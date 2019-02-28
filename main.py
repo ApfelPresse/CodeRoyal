@@ -473,8 +473,7 @@ class Referee(AbstractReferee):
         self.gameManager.frameDuration = 750  # another magic number, can also be ignored, i guess.
 
         self.gameManager.players[0].enemyPlayer = self.gameManager.players[1]
-        self.gameManager.players[01.
-        enemyPlayer = self.gameManager.players[0]
+        self.gameManager.players[1].enemyPlayer = self.gameManager.players[0]
         self.gameManager.players[1].isSecondPlayer = True
         for p in self.gameManager.players:
             p.health = Leagues.queenHp
@@ -483,10 +482,10 @@ class Referee(AbstractReferee):
 
         for activePlaye, invert in zip(self.gameManger.activePlayers, [False, True]):
             spawnDistance = 200  # Magic number
-        if invert:
-            corner = Vector2(Constants.WORLD_WIDTH - spawnDistance, Constants.WORLD_HEIGHT - spawnDistance)
-        else:
-            corner = Vector2(spawnDistance, spawnDistance)
+            if invert:
+                corner = Vector2(Constants.WORLD_WIDTH - spawnDistance, Constants.WORLD_HEIGHT - spawnDistance)
+            else:
+                corner = Vector2(spawnDistance, spawnDistance)
         activePlayer.queenUnit = Queen(activePlayer)
         activePlayer.queenUnit.location = corner
 
