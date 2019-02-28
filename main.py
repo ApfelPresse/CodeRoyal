@@ -384,6 +384,18 @@ class AbstractReferee:  # TODO find, fill or ignore
     pass
 
 
+class Leagues:
+    """ Source: unknown
+    """
+    def __init__(self):
+        self.mines = True
+        self.fixedIncome = None
+        self.towers = True
+        self.giants = True
+        self.obstacles = None
+        self.queenHp = 100  # ?
+        
+        
 class Referee(AbstractReferee):
     def __init__(self, params):
         super().__init__()
@@ -396,23 +408,23 @@ class Referee(AbstractReferee):
 
         if self.gameManager.leagueLevel == 1:
             Leagues.mines = False
-        Leagues.fixedIncome = Constants.WOOD_FIXED_INCOME
-        Leagues.towers = False
-        Leagues.giants = False
-        Leagues.obstacles = Constants.OBSTACLE_PAIRS.sample()
+            Leagues.fixedIncome = Constants.WOOD_FIXED_INCOME
+            Leagues.towers = False
+            Leagues.giants = False
+            Leagues.obstacles = Constants.OBSTACLE_PAIRS.sample()
         elif self.gameManager.leagueLevel == 2:
-        Leagues.mines = False
-        Leagues.fixedIncome = Constants.WOOD_FIXED_INCOME
-        Leagues.obstacles = Constants.OBSTACLE_PAIRS.sample()
+            Leagues.mines = False
+            Leagues.fixedIncome = Constants.WOOD_FIXED_INCOME
+            Leagues.obstacles = Constants.OBSTACLE_PAIRS.sample()
         elif self.gameManager.leagueLevel == 3:
+            pass
         else:
-        Leagues.queenHp = Constants.QUEEN_HP.sample() * Constants.QUEEN_HP_MULT
+            Leagues.queenHp = Constants.QUEEN_HP.sample() * Constants.QUEEN_HP_MULT
 
         self.gameManager.frameDuration = 750  # another magic number, can also be ignored, i guess.
 
         self.gameManager.players[0].enemyPlayer = self.gameManager.players[1]
-        self.gameManager.players[01.
-        enemyPlayer = self.gameManager.players[0]
+        self.gameManager.players[1].enemyPlayer = self.gameManager.players[0]
         self.gameManager.players[1].isSecondPlayer = True
         for p in self.gameManager.players:
             p.health = Leagues.queenHp
@@ -421,10 +433,10 @@ class Referee(AbstractReferee):
 
         for activePlaye, invert in zip(self.gameManger.activePlayers, [False, True]):
             spawnDistance = 200  # Magic number
-        if invert:
-            corner = Vector2(Constants.WORLD_WIDTH - spawnDistance, Constants.WORLD_HEIGHT - spawnDistance)
-        else:
-            corner = Vector2(spawnDistance, spawnDistance)
+            if invert:
+                corner = Vector2(Constants.WORLD_WIDTH - spawnDistance, Constants.WORLD_HEIGHT - spawnDistance)
+            else:
+                corner = Vector2(spawnDistance, spawnDistance)
         activePlayer.queenUnit = Queen(activePlayer)
         activePlayer.queenUnit.location = corner
 
