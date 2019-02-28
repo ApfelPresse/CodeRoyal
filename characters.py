@@ -126,16 +126,42 @@ class GiantCreep(Creep):
         """
         # TODO (how/where to) get current obstacles ? - set externally?
         opp_structures = filter(
-            lambda struct: struct != None and struct.owner and struct.owner == self.owner.enemyPlayer)
+            lambda struct: struct != None
+                           and struct == Tower
+                           and struct.owner == self.owner.enemyPlayer,
+            self.obstacles)
         target = min(opp_structures, key=lambda struct: struct.location.distanceTo(self.location))
 
         self.location = self.location.towards(target)
 
     def dealDamage(self):
-        pass  # TODO
+        opp_structures = filter(
+            lambda
+                struct: struct != None
+                        and isinstance(struct, Tower)
+                        and struct.owner == self.owner.enemyPlayer
+                        and struct.location.distanceTo(
+                self.location) < self.radius + struct.radius + Constants.TOUCHING_DELTA,
+            self.obstacles)
+        if len(opp_structures) == 0:
+            return
+        target = opp_structures[0]
+        # target should be a tower
+        target.health -= Constants.GIANT_BUST_RATE
+        creepToTower = target.location - self.location
+
+        # TODO REMOVE ME
+        characterSprite = {}
+        theEntityManager = {}
+
+        characterSprite.location = creepToTower.resizedTo(self.radius)
+        theEntityManager.commitEntityState(0.2, characterSprite)
+        characterSprite.location = Vector2(0, 0)
+        theEntityManager.commitEntityState(1.0, characterSprite)
 
     def finalizeFrame(self):
         pass
+
 
 class KnightCreep(Creep):
 
