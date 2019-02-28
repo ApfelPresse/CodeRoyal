@@ -64,6 +64,15 @@ class CreepType:
         self.assetName = assetName
 
 
+class Curve:
+    NONE = -1
+    LINEAR = 0
+    IMMEDIATE = 1
+    EASE_IN_AND_OUT = 2
+    ELASTIC = 3
+    DEFAULT = LINEAR
+
+
 KNIGHT = CreepType(4, 80, 100, 0, 20, 400, 30, 5, "Unite_Fantassin")
 ARCHER = CreepType(2, 100, 75, 200, 25, 900, 45, 8, "Unite_Archer")
 GIANT = CreepType(1, 140, 50, 0, 40, 2000, 200, 10, "Unite_Siege")

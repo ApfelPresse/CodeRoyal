@@ -1,4 +1,3 @@
-import copy
 from abc import abstractmethod
 
 from constants import *
@@ -127,7 +126,7 @@ class GiantCreep(Creep):
         # TODO (how/where to) get current obstacles ? - set externally?
         opp_structures = filter(
             lambda struct: struct != None
-                           and struct == Tower
+                           and isinstance(struct, Tower)
                            and struct.owner == self.owner.enemyPlayer,
             self.obstacles)
         target = min(opp_structures, key=lambda struct: struct.location.distanceTo(self.location))
@@ -165,26 +164,55 @@ class GiantCreep(Creep):
 
 class KnightCreep(Creep):
 
-    def dealDamage(self):
-        pass
-
-    def move(self, frames):
-        pass
-
     def __int__(self, owner):
         super().__init__(owner, KNIGHT)
-        self.owner
-        self.lastLocation = None
+        self.owner = owner
+        self.lastLocation: Vector2 = None
+        self.attacksThisTurn: bool = False
+
+    def dealDamage(self):
         self.attacksThisTurn = False
+        enemyQueen = self.owner.enemyPlayer.queenUnit
+        if self.location.distanceTo(
+                enemyQueen.location) < self.radius + enemyQueen.radius + self.attackRange + Constants.TOUCHING_DELTA:
+            self.attacksThisTurn = True
+
+            # TODO REMOVE ME
+            self.characterSprite = {}
+            self.theEntityManager = {}
+
+            self.characterSprite.setAnchorX(0.5, Curve.IMMEDIATE)
+            self.theEntityManager.commitEntityState(0.4, self.characterSprite)
+            self.characterSprite.anchorX = 0.2
+            self.theEntityManager.commitEntityState(0.7, self.characterSprite)
+            self.characterSprite.anchorX = 0.5
+            self.theEntityManager.commitEntityState(1.0, self.characterSprite)
+            self.owner.enemyPlayer.health -= Constants.KNIGHT_DAMAGE
+
+    def move(self, frames: float):
+        enemyQueen = self.owner.enemyPlayer.queenUnit
+        # move toward enemy queen, if not yet in range
+        if self.location.distanceTo(enemyQueen.location) > self.radius + enemyQueen.radius + self.attackRange:
+            self.location = self.location.towards(
+                (enemyQueen.location + (self.location - enemyQueen.location).resizedTo(3.0)),
+                self.speed * frames)
 
     def finalizeFrame(self):
-        last = copy.copy(self.lastLocation)
+        if self.lastLocation is not None:
 
-        if last != None:
+            last = self.lastLocation.copy()
+
             if last.distanceTo(self.location) > 30 and not self.attacksThisTurn:
-                last = self.location - last
-        else:
-            pass
+                movementVector = self.location - last
+            else:
+                movementVector = self.owner.enemyPlayer.queenUnit.location - self.location
+
+            # TODO REMOVE MEEE
+            characterSprite = {}
+
+            characterSprite.rotation = movementVector.angle
+
+        self.lastLocation = self.location
 
 #   override fun finalizeFrame() {
 #     val last = lastLocation
