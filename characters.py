@@ -19,7 +19,7 @@ class Unit(FieldObject):
     """Characters.kt : Unit
     """
 
-    def __init(self, owner):
+    def __init__(self, owner):
         """
         param owner - Player
         """
@@ -38,29 +38,41 @@ class Queen(Unit):
     """Characters.kt : Queen
     """
 
-    def __int__(self, owner):
-        super().__init__(owner)  # TODO
+    def __init__(self, owner):
+        super().__init__(owner)
         self.mass = Constants.QUEEN_MASS
+        self.radius = Constants.QUEEN_RADIUS
+        self.maxHealth = Constants.QUEEN_HP
 
-    def moveTowards(self, target):
+        # TODO REMOVE ME
+        self.characterSprite = {}
+        self.tokenCircle = {}
+
+        self.characterSprite.image = "Unite_Reine"
+        # theTooltipModule.registerEntity(tokenGroup, mapOf("type" to "Queen"))
+        self.tokenCircle.baseWidth = self.radius * 2
+        self.tokenCircle.baseHeight = self.radius * 2
+        self.characterSprite.baseWidth = self.radius * 2
+        self.characterSprite.baseHeight = self.radius * 2
+
+    def moveTowards(self, target: Vector2):
         """
         param target - Vector2
         """
         self.location = self.location.towards(target, Constants.QUEEN_SPEED)
 
     def damage(self, damageAmount):
-        if (damageAmount <= 0):
+        if damageAmount <= 0:
             return
-        self.owner.health = max(0,
-                                self.owner.health - damageAmount)  # TODO CHECK: maybe just ignore owner, and use self here?!?
-        # self.health = max(0, owner.health - damageAmount)
+        # TODO CHECK: maybe just ignore owner, and use self here?!?
+        self.owner.health = max(0, self.owner.health - damageAmount)
 
 
 class Creep(Unit):
     """Characters.kt : Creep
     """
 
-    def __int__(self, owner, creepType):
+    def __init__(self, owner, creepType):
         super().__init__(owner)
         self.speed = creepType.speed
         self.attackRange = creepType.attackRange
@@ -69,20 +81,27 @@ class Creep(Unit):
         self.radius = creepType.radius
         self.health = creepType.hp
 
+        # TODO REMOVE MEEEE
         self.tokenCircle = {}
+        self.characterSprite = {}
+
         self.tokenCircle.baseWidth = self.radius * 2
         self.tokenCircle.baseHeight = self.radius * 2
         self.characterSprite.image = creepType.assetName
         self.characterSprite.baseWidth = self.radius * 2
         self.characterSprite.baseHeight = self.radius * 2
 
+        # theTooltipModule.registerEntity(tokenGroup,mapOf("type" to creepType.toString()))
+
     @abstractmethod
     def finalizeFrame(self):
         pass
 
     def damage(self, damageAmount):
-        if (damageAmount <= 0): return
+        if damageAmount <= 0:
+            return
         self.health -= damageAmount
+        # theTooltipModule.updateExtraTooltipText(tokenCircle, "Health: $health")
 
     @abstractmethod
     def dealDamage(self):
@@ -115,6 +134,8 @@ class GiantCreep(Creep):
     def dealDamage(self):
         pass  # TODO
 
+    def finalizeFrame(self):
+        pass
 
 class KnightCreep(Creep):
 
