@@ -1,10 +1,5 @@
-import copy
-from abc import abstractmethod
-
-from constants import *
 from characters import *
 from vector2 import *
-import numpy as np
 
 h = 1000
 l = 1920
@@ -12,7 +7,6 @@ field = np.zeros((h, l))  # << NO.
 
 viewportX = list(range(l))
 viewportY = list(range(h))
-
 
 
 class AbstractPlayer:
@@ -53,8 +47,6 @@ class Player(AbstractPlayer):
     def kill(self, reason):
         self.score = -1
         self.deactivate(reason)
-
-
 
 
 """
@@ -202,18 +194,6 @@ class AbstractReferee:  # TODO find, fill or ignore
     pass
 
 
-class Leagues:
-    """ Source: unknown
-    """
-    def __init__(self):
-        self.mines = True
-        self.fixedIncome = None
-        self.towers = True
-        self.giants = True
-        self.obstacles = None
-        self.queenHp = 100  # ?
-        
-        
 class Referee(AbstractReferee):
     def __init__(self, params):
         super().__init__()
@@ -280,11 +260,50 @@ class Referee(AbstractReferee):
             pass  # FIXME Referee.kt lines 119 .. 167
             # TODO most interesting stuff happens here..
 
+    def processPlayerActions(self):
+        obstaclesAttemptedToBuildUpon = []
+        scheduledBuildings = []
+
+    def scheduleBuilding(self, player: Player, obs: Obstacle, strucType: str):
+        struc = obs.structure
+        if struc is not None and struc.owner == player.enemyPlayer:
+            print("Cannot build: owned by enemy player")
+            return
+        if isinstance(struc, Barracks) and struc.owner == player and struc.isTraining:
+            print("Cannot rebuild: training is in progress")
+            return
+        self.obstaclesAttemptedToBuildUpon += obs
+        toks = strucType.split("-")
+
+        if len(toks) == 0:
+            print("Structure type must be specified")
+
+        for firstToken in toks:
+            if firstToken == "MINE" and Leagues.mines:
+                if isinstance(struc, Mine):
+                    struc: Mine = struc
+                    struc.incomeRate += 1
+                    if struc.incomeRate > obs.maxMineSize:
+                        struc.incomeRate = obs.maxMineSize
+                    else:
+                        obs.setMine(player)
+            elif firstToken == "TOWER" and Leagues.towers:
+                if isinstance(struc, Tower):
+                    struc: Tower = struc
+                    struc.health += Constants.TOWER_HP_INCREMENT
+                    if struc.health > Constants.TOWER_HP_MAXIMUM:
+                        struc.health = Constants.TOWER_HP_MAXIMUM
+                else:
+                    obs.setTower(player, Constants.TOWER_HP_INITIAL)
+            elif firstToken == "BARRACKS":
+                pass
+
 
 """
 ### MapBuilding.kt
 """
 Pair = tuple
+
 
 def sample(list_like):
     """uses global <theRandom>
@@ -311,26 +330,26 @@ def buildMap():
             obstaclePairs.append([a, b])
             obstacles.append(a)
             obstacles.append(b)
-        
+
         # cool code bro! TODO check this part in original...! lines 35-46
         coll_results = []  # anyway ignored later!
         for _ in range(100):
             # am i missing something?!? TODO FIXME CHECK
             # i feel this part is hilariously bad ...
             mid = (o1.location + Vector2(Constants.WORLD_WIDTH - o2.location.x,
-                                        Constants.WORLD_HEIGHT - o2.location.y)) / 2.0
+                                         Constants.WORLD_HEIGHT - o2.location.y)) / 2.0
             o1.location = mid
-            o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, 
+            o2.location = Vector2(Constants.WORLD_WIDTH - mid.x,
                                   Constants.WORLD_HEIGHT - mid.y)
-            coll_results.append(collisionCheck(obstacles, Constant.OBSTACLE_GAP))
+            coll_results.append(collisionCheck(obstacles, Constants.OBSTACLE_GAP))
         if all(coll_results):
             return obstacles
         return obstacles
-    
+
     obstacles = None
     while obstales is None:
         obstales = buildObstacles()
-        
+
     mapCenter = Vector2(len(viewportX) / 2, len(viewportY) / 2)
     for o in obstacles:
         o.location = o.location.snapToIntegers()  # TODO where is this? :D
@@ -342,7 +361,6 @@ def buildMap():
             o.gold += Constants.OBSTACLE_GOLD_INCREASE
     return obstacles
 
-
     def collisionCheck(entities, accetpableGap=0.0):
         """
         param entities - List<FieldObject>
@@ -352,27 +370,27 @@ def buildMap():
             rad = u1.radius
             clampDist = Constants.OBSTACLE_GAP + rad if u1.mass == 0 else rad
             u1.location = i1.location.clampWithin(
-                                clampDist, Constants.WORLD_WIDTH - clampDist, 
-                                clampDist, Constants.WORLD_HEIGHT - clampDist)
+                clampDist, Constants.WORLD_WIDTH - clampDist,
+                clampDist, Constants.WORLD_HEIGHT - clampDist)
             for j, u2 in enumerate(entities):
                 if i == j:
                     continue
                 dist = u1.location.distanceTo(u2.location)
-                overlap = u1.radius + u2.radius + acceptableGap - dist # IN ORIGINAL: "// TODO: Fix this?"
+                overlap = u1.radius + u2.radius + acceptableGap - dist  # IN ORIGINAL: "// TODO: Fix this?"
                 if overlap <= 1e-6:
                     result.append(False)
                 else:
-                    if u1.mass == 0 and u2.mass == 0: 
+                    if u1.mass == 0 and u2.mass == 0:
                         d1, d2 = 0.5, 0.5
-                    elif u1.mass == 0: 
+                    elif u1.mass == 0:
                         d1, d2 = 0.0, 1.0
-                    elif u2.mass == 0: 
+                    elif u2.mass == 0:
                         d1, d2 = 1.0, 0.0
-                    else: 
+                    else:
                         d1, d2 = u2.mass / (u1.mass + u2.mass), u1.mass / (u1.mass + u2.mass)
                     u1tou2 = u2.location - u1.location
                     gap = 20.0 if u1.mass == 0 and u2.mass == 0 else 1.0
-                    
+
                     u1.location -= u1tou2.resizedTo(d1 * overlap + 0.0 if (u1.mass == 0 and u2.mass > 0) else gap)
                     u2.location += u1tou2.resizedTo(d2 * overlap + 0.0 if (u2.mass == 0 and u1.mass > 0) else gap)
                     results.append(True)
