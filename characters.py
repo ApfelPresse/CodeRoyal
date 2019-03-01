@@ -10,7 +10,7 @@ class FieldObject:
     """
 
     def __int__(self):
-        self.location: Vector2 = None
+        self.location = None
         self.radius = 0
         self.mass = 0  # 0 := immovable
 
@@ -25,7 +25,7 @@ class Unit(FieldObject):
         """
         super().__init__()
         self.owner = owner
-        self.location: Vector2 = Vector2()
+        self.location = Vector2()
         self.maxHealth = 0
         self.health = 0  # >> self.health >= 0
 
@@ -168,8 +168,8 @@ class KnightCreep(Creep):
     def __int__(self, owner):
         super().__init__(owner, KNIGHT)
         self.owner = owner
-        self.lastLocation: Vector2 = None
-        self.attacksThisTurn: bool = False
+        self.lastLocation = None
+        self.attacksThisTurn = False
 
     def dealDamage(self):
         self.attacksThisTurn = False
@@ -221,9 +221,9 @@ class ArcherCreep(Creep):
     def __int__(self, owner):
         super().__init__(owner, ARCHER)
         self.owner = owner
-        self.lastLocation: Vector2 = None
-        self.attacksThisTurn: bool = False
-        self.attackTarget: Creep = None
+        self.lastLocation = None
+        self.attacksThisTurn = False
+        self.attackTarget = None
         # projectile = theEntityManager.createSprite()!!.setZIndex(60).setImage("Fleche_$color").setVisible(false).setAnchorX(1.0).setAnchorY(0.5)
 
     def dealDamage(self):
