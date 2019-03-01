@@ -116,7 +116,7 @@ class GiantCreep(Creep):
     """
 
     def __int__(self, owner):
-        super().__init__(owner, KNIGHT)
+        super().__init__(owner, GIANT)
         self.obstacles = []  # type: Obstacle
 
     def move(self, frames):
@@ -214,39 +214,25 @@ class KnightCreep(Creep):
 
         self.lastLocation = self.location
 
-#   override fun finalizeFrame() {
-#     val last = lastLocation
-#
-#     if (last != null) {
-#       val movementVector = when {
-#         last.distanceTo(location) > 30 && !attacksThisTurn -> location - last
-#         else -> owner.enemyPlayer.queenUnit.location - location
-#       }
-#       characterSprite.rotation = movementVector.angle
-#     }
-#
-#     lastLocation = location
-#   }
-#
-#   override fun move(frames: Double)  {
-#     val enemyQueen = owner.enemyPlayer.queenUnit
-#     // move toward enemy queen, if not yet in range
-#     if (location.distanceTo(enemyQueen.location) > radius + enemyQueen.radius + attackRange)
-#       location = location.towards((enemyQueen.location + (location - enemyQueen.location).resizedTo(3.0)), speed.toDouble() * frames)
-#   }
-#
-#   override fun dealDamage() {
-#     attacksThisTurn = false
-#     val enemyQueen = owner.enemyPlayer.queenUnit
-#     if (location.distanceTo(enemyQueen.location) < radius + enemyQueen.radius + attackRange + TOUCHING_DELTA) {
-#       attacksThisTurn = true
-#       characterSprite.setAnchorX(0.5, Curve.IMMEDIATE)
-#       theEntityManager.commitEntityState(0.4, characterSprite)
-#       characterSprite.anchorX = 0.2
-#       theEntityManager.commitEntityState(0.7, characterSprite)
-#       characterSprite.anchorX = 0.5
-#       theEntityManager.commitEntityState(1.0, characterSprite)
-#       owner.enemyPlayer.health -= KNIGHT_DAMAGE
-#     }
-#   }
-# }
+
+class ArcherCreep(Creep):
+
+    def __int__(self, owner):
+        super().__init__(owner, ARCHER)
+        self.owner = owner
+        self.lastLocation: Vector2 = None
+        self.attacksThisTurn: bool = False
+
+        # projectile = theEntityManager.createSprite()!!.setZIndex(60).setImage("Fleche_$color").setVisible(false).setAnchorX(1.0).setAnchorY(0.5)
+
+    def dealDamage(self):
+        pass
+
+    def move(self, frames: float):
+        pass
+
+    def finalizeFrame(self):
+        pass
+
+    def findTarget(self):
+        pass
