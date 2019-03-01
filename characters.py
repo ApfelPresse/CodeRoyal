@@ -1,3 +1,4 @@
+import math
 from abc import abstractmethod
 
 from constants import *
@@ -9,7 +10,7 @@ class FieldObject:
     """
 
     def __int__(self):
-        self.location = None
+        self.location: Vector2 = None
         self.radius = 0
         self.mass = 0  # 0 := immovable
 
@@ -24,7 +25,7 @@ class Unit(FieldObject):
         """
         super().__init__()
         self.owner = owner
-        self.location = Vector2()
+        self.location: Vector2 = Vector2()
         self.maxHealth = 0
         self.health = 0  # >> self.health >= 0
 
@@ -222,17 +223,67 @@ class ArcherCreep(Creep):
         self.owner = owner
         self.lastLocation: Vector2 = None
         self.attacksThisTurn: bool = False
-
+        self.attackTarget: Creep = None
         # projectile = theEntityManager.createSprite()!!.setZIndex(60).setImage("Fleche_$color").setVisible(false).setAnchorX(1.0).setAnchorY(0.5)
 
     def dealDamage(self):
-        pass
+        target = self.findTarget()
+        if target is None:
+            return
+
+        if self.location.distanceTo(
+                target.location) < self.radius + target.radius + self.attackRange + Constants.TOUCHING_DELTA:
+            dmg = Constants.ARCHER_DAMAGE_TO_GIANTS if isinstance(target, GiantCreep) else Constants.ARCHER_DAMAGE
+            target.damage(dmg)
+            self.attackTarget = target
 
     def move(self, frames: float):
-        pass
+        target = self.findTarget()
+        if target is None:
+            return
+        # move toward target, if not yet in range
+
+        if self.location.distanceTo(target.location) > self.radius + target.radius + self.attackRange:
+            self.location = self.location.towards((target.location + (self.location - target.location).resizedTo(3.0)),
+                                                  self.speed * frames)
 
     def finalizeFrame(self):
-        pass
+        target = self.findTarget()
+
+        # TODO REMOVE MEEEEE
+        characterSprite = {}
+        theEntityManager = {}
+        projectile = {}
+        viewportX = {}
+        viewportY = {}
+
+        if self.lastLocation is not None:
+            if self.lastLocation.distanceTo(self.location) > 30:
+                movementVector = self.location - self.lastLocation
+            else:
+                movementVector = target.location - self.location
+
+            characterSprite.rotation = math.atan2(movementVector.y, movementVector.x)
+
+        self.lastLocation = self.location
+
+        if self.attackTarget is not None:
+            characterSprite.anchorX = 0.8
+            theEntityManager.commitEntityState(0.3, characterSprite)
+            characterSprite.anchorX = 0.5
+            theEntityManager.commitEntityState(0.4, characterSprite)
+
+            projectile.setRotation((self.attackTarget.location - self.location).angle, Curve.IMMEDIATE)
+            projectile.isVisible = True
+            projectile.setX(self.location.x.toInt() + viewportX.first, Curve.NONE)
+            projectile.setY(self.location.y.toInt() + viewportY.first, Curve.NONE)
+            theEntityManager.commitEntityState(0.4, projectile)
+            projectile.setX(self.attackTarget.location.x.toInt() + viewportX.first, Curve.EASE_IN_AND_OUT)
+            projectile.setY(self.attackTarget.location.y.toInt() + viewportY.first, Curve.EASE_IN_AND_OUT)
+            theEntityManager.commitEntityState(0.99, projectile)
+            projectile.isVisible = False
+            theEntityManager.commitEntityState(1.0, projectile)
 
     def findTarget(self):
-        pass
+        target = min(self.owner.enemyPlayer.activeCreeps, lambda creep: creep.location.distanceTo(self.location))
+        return target
