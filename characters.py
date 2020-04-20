@@ -44,16 +44,16 @@ class Queen(Unit):
         self.radius = Constants.QUEEN_RADIUS
         self.maxHealth = Constants.QUEEN_HP
 
-        # TODO REMOVE ME
-        self.characterSprite = {}
         self.tokenCircle = {}
-
-        self.characterSprite.image = "Unite_Reine"
-        # theTooltipModule.registerEntity(tokenGroup, mapOf("type" to "Queen"))
         self.tokenCircle.baseWidth = self.radius * 2
         self.tokenCircle.baseHeight = self.radius * 2
-        self.characterSprite.baseWidth = self.radius * 2
-        self.characterSprite.baseHeight = self.radius * 2
+
+        # TODO REMOVE ME
+        # self.characterSprite = {}
+        # self.characterSprite.image = "Unite_Reine"
+        # theTooltipModule.registerEntity(tokenGroup, mapOf("type" to "Queen"))
+        # self.characterSprite.baseWidth = self.radius * 2
+        # self.characterSprite.baseHeight = self.radius * 2
 
     def moveTowards(self, target: Vector2):
         """
@@ -83,13 +83,13 @@ class Creep(Unit):
 
         # TODO REMOVE MEEEE
         self.tokenCircle = {}
-        self.characterSprite = {}
+        # self.characterSprite = {}
 
         self.tokenCircle.baseWidth = self.radius * 2
         self.tokenCircle.baseHeight = self.radius * 2
-        self.characterSprite.image = creepType.assetName
-        self.characterSprite.baseWidth = self.radius * 2
-        self.characterSprite.baseHeight = self.radius * 2
+        # self.characterSprite.image = creepType.assetName
+        # self.characterSprite.baseWidth = self.radius * 2
+        # self.characterSprite.baseHeight = self.radius * 2
 
         # theTooltipModule.registerEntity(tokenGroup,mapOf("type" to creepType.toString()))
 
@@ -126,7 +126,7 @@ class GiantCreep(Creep):
         """
         # TODO (how/where to) get current obstacles ? - set externally?
         opp_structures = filter(
-            lambda struct: struct != None
+            lambda struct: struct is not None
                            and isinstance(struct, Tower)
                            and struct.owner == self.owner.enemyPlayer,
             self.obstacles)
@@ -136,11 +136,10 @@ class GiantCreep(Creep):
 
     def dealDamage(self):
         opp_structures = filter(
-            lambda
-                struct: struct != None
-                        and isinstance(struct, Tower)
-                        and struct.owner == self.owner.enemyPlayer
-                        and struct.location.distanceTo(
+            lambda struct: struct is not None
+                           and isinstance(struct, Tower)
+                           and struct.owner == self.owner.enemyPlayer
+                           and struct.location.distanceTo(
                 self.location) < self.radius + struct.radius + Constants.TOUCHING_DELTA,
             self.obstacles)
         if len(opp_structures) == 0:
@@ -151,13 +150,13 @@ class GiantCreep(Creep):
         creepToTower = target.location - self.location
 
         # TODO REMOVE ME
-        characterSprite = {}
-        theEntityManager = {}
-
-        characterSprite.location = creepToTower.resizedTo(self.radius)
-        theEntityManager.commitEntityState(0.2, characterSprite)
-        characterSprite.location = Vector2(0, 0)
-        theEntityManager.commitEntityState(1.0, characterSprite)
+        # characterSprite = {}
+        # theEntityManager = {}
+        #
+        # characterSprite.location = creepToTower.resizedTo(self.radius)
+        # theEntityManager.commitEntityState(0.2, characterSprite)
+        # characterSprite.location = Vector2(0, 0)
+        # theEntityManager.commitEntityState(1.0, characterSprite)
 
     def finalizeFrame(self):
         pass
@@ -179,15 +178,16 @@ class KnightCreep(Creep):
             self.attacksThisTurn = True
 
             # TODO REMOVE ME
-            self.characterSprite = {}
-            self.theEntityManager = {}
+            # self.characterSprite = {}
+            # self.theEntityManager = {}
+            #
+            # self.characterSprite.setAnchorX(0.5, Curve.IMMEDIATE)
+            # self.theEntityManager.commitEntityState(0.4, self.characterSprite)
+            # self.characterSprite.anchorX = 0.2
+            # self.theEntityManager.commitEntityState(0.7, self.characterSprite)
+            # self.characterSprite.anchorX = 0.5
+            # self.theEntityManager.commitEntityState(1.0, self.characterSprite)
 
-            self.characterSprite.setAnchorX(0.5, Curve.IMMEDIATE)
-            self.theEntityManager.commitEntityState(0.4, self.characterSprite)
-            self.characterSprite.anchorX = 0.2
-            self.theEntityManager.commitEntityState(0.7, self.characterSprite)
-            self.characterSprite.anchorX = 0.5
-            self.theEntityManager.commitEntityState(1.0, self.characterSprite)
             self.owner.enemyPlayer.health -= Constants.KNIGHT_DAMAGE
 
     def move(self, frames: float):
@@ -209,9 +209,8 @@ class KnightCreep(Creep):
                 movementVector = self.owner.enemyPlayer.queenUnit.location - self.location
 
             # TODO REMOVE MEEE
-            characterSprite = {}
-
-            characterSprite.rotation = movementVector.angle
+            # characterSprite = {}
+            # characterSprite.rotation = movementVector.angle
 
         self.lastLocation = self.location
 
@@ -251,8 +250,8 @@ class ArcherCreep(Creep):
         target = self.findTarget()
 
         # TODO REMOVE MEEEEE
-        characterSprite = {}
-        theEntityManager = {}
+        # characterSprite = {}
+        # theEntityManager = {}
         projectile = {}
         viewportX = {}
         viewportY = {}
@@ -268,10 +267,11 @@ class ArcherCreep(Creep):
         self.lastLocation = self.location
 
         if self.attackTarget is not None:
-            characterSprite.anchorX = 0.8
-            theEntityManager.commitEntityState(0.3, characterSprite)
-            characterSprite.anchorX = 0.5
-            theEntityManager.commitEntityState(0.4, characterSprite)
+            # TODO REMOVE MEEEEE
+            # characterSprite.anchorX = 0.8
+            # theEntityManager.commitEntityState(0.3, characterSprite)
+            # characterSprite.anchorX = 0.5
+            # theEntityManager.commitEntityState(0.4, characterSprite)
 
             projectile.setRotation((self.attackTarget.location - self.location).angle, Curve.IMMEDIATE)
             projectile.isVisible = True

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Constants:
     STARTING_GOLD = 100
 
