@@ -1,8 +1,10 @@
 import numpy as np
 
-
 class Constants:
     STARTING_GOLD = 100
+
+    viewportX = np.arange(0, 1920)
+    viewportY = np.arange(0, 1000)
 
     QUEEN_SPEED = 60
     TOWER_HP_INITIAL = 200
