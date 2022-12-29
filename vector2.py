@@ -45,6 +45,9 @@ class Vector2:
     def __str__(self):
         return f"({self.x}, {self.y})"
 
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
     def clampWithin(self, minX: float, maxX: float, minY: float, maxY: float) -> Vector2:
         if self.x < minX:
             nx = minX
@@ -70,13 +73,14 @@ class Vector2:
 
     def normalized(self):
         length = math.sqrt(self.lengthSquared())
-        if length < 1e6:
-            return Vector2(1, 0)
-        else:
-            return Vector2(self.x / length, self.y / length)
+        # if length < 1e6: TODO WHY?
+        #     return Vector2(1, 0)
+        # else:
+        return Vector2(self.x / length, self.y / length)
 
     def towards(self, other: Vector2, maxDistance: float):
         if self.distanceTo(other) < maxDistance:
             return other
         else:
-            return self + (other - self).resizedTo(maxDistance)
+            new_loc = self + (other - self).resizedTo(maxDistance)
+            return new_loc

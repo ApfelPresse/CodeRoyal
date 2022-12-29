@@ -11,11 +11,12 @@ class Player(AbstractPlayer):
 
     # activeCreeps: List[Creep]
 
-    def __init__(self):
+    def __init__(self, name):
         self.isSecondPlayer = None
         self.queenUnit = None
         self.enemyPlayer = None
         self.activeCreeps = []
+        self.name = name
         self.outputs = [
             "",
             "",
@@ -35,7 +36,10 @@ class Player(AbstractPlayer):
     # def printObstaclePerTurn(self, obstacle): raise NotImplementedError()
 
     def allUnits(self):
-        return self.activeCreeps + [self.queenUnit]  # TODO not sure <<
+        ent = []
+        ent.extend(self.activeCreeps)
+        ent.append(self.queenUnit)
+        return ent
 
     def checkQueenHealth(self):
         self.queenUnit.health = self.health  # << really ?? double bookkeeping here.

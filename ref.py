@@ -1,4 +1,3 @@
-from random import Random
 from typing import List
 
 from MapBuilding import buildMap, fixCollisions, flatMap, sample
@@ -10,21 +9,27 @@ from vector2 import Vector2
 
 class GameManager:
     maxTurns: int = 200
-    leagueLevel: int = 1
+    leagueLevel: int
+    solo: bool
     players: List[Player] = []
     activePlayers: List[Player] = []
 
-    def __init__(self):
-        self.players.append(Player())
-        self.players.append(Player())
+    def __init__(self, leagueLevel=1, solo=False):
+        self.players.append(Player("blue"))
+
+        self.solo = solo
+        if not self.solo:
+            self.players.append(Player("red"))
+
         self.activePlayers = self.players
+        self.leagueLevel = leagueLevel
 
 
 class AbstractReferee:  # TODO find, fill or ignore
     gameManager: GameManager
 
-    def __init__(self):
-        self.gameManager = GameManager()
+    def __init__(self, solo):
+        self.gameManager = GameManager(solo=solo)
 
 
 class Referee(AbstractReferee):
@@ -32,16 +37,19 @@ class Referee(AbstractReferee):
 
     end_game: bool
 
-    def __init__(self, params):
-        super().__init__()
+    def __init__(self, params, solo=False):
+        super().__init__(solo=solo)
         self.obstacles = []
         self.gameManager.maxTurns = 200  # < why not Constants.XXX here?
 
         self.end_game = False
-
+        self.turn = 0
         # Now, this gets interesting.
         # are Kotlin and Python RNGs 'compatible'?!?
-        self.theRandom = Random(int(params['seed'])) if params['seed'] else Random()
+        # self.theRandom = Random(int(params['seed'])) if params['seed'] else Random()
+
+        if "leagueLevel" in params:
+            self.gameManager.leagueLevel = params["leagueLevel"]
 
         if self.gameManager.leagueLevel == 1:
             Leagues.mines = False
@@ -60,9 +68,10 @@ class Referee(AbstractReferee):
 
         self.gameManager.frameDuration = 750  # another magic number, can also be ignored, i guess.
 
-        self.gameManager.players[0].enemyPlayer = self.gameManager.players[1]
-        self.gameManager.players[1].enemyPlayer = self.gameManager.players[0]
-        self.gameManager.players[1].isSecondPlayer = True
+        if not self.gameManager.solo:
+            self.gameManager.players[0].enemyPlayer = self.gameManager.players[1]
+            self.gameManager.players[1].enemyPlayer = self.gameManager.players[0]
+            self.gameManager.players[1].isSecondPlayer = True
         for p in self.gameManager.players:
             p.health = Leagues.queenHp
 
@@ -77,6 +86,10 @@ class Referee(AbstractReferee):
             activePlayer.queenUnit = Queen(activePlayer)
             activePlayer.queenUnit.location = corner
 
+        # for e in self.allEntities():
+        #     if e is None:
+        #         print()
+
         fixCollisions(self.allEntities())
 
         # for p in self.gameManager.activePlayers:
@@ -87,10 +100,23 @@ class Referee(AbstractReferee):
 
         # return params
 
-    def allEntities(self):
-        return [u for p in self.gameManager.players for u in p.allUnits()] + self.obstacles
+    def get_buildings_of_player(self, player) -> List[Obstacle]:
+        buildings = []
+        for ent in self.obstacles:
+            if ent.structure is not None and ent.structure.owner.name == player.name:
+                buildings.append(ent)
+        return buildings
 
-    def scheduleBuilding(self, player: Player, obs: Obstacle, strucType: str, obstaclesAttemptedToBuildUpon: list, scheduledBuildings: list):
+    def allEntities(self):
+        ent = []
+        ent.extend(self.obstacles)
+        for player in self.gameManager.players:
+            ent.extend(player.allUnits())
+        return ent
+        # return [u for p in self.gameManager.players for u in p.allUnits()] + self.obstacles
+
+    def scheduleBuilding(self, player: Player, obs: Obstacle, strucType: str, obstaclesAttemptedToBuildUpon: list,
+                         scheduledBuildings: list):
         struc = obs.structure
         if struc is not None and struc.owner == player.enemyPlayer:
             raise Exception("Cannot build: owned by enemy player")
@@ -100,14 +126,20 @@ class Referee(AbstractReferee):
         toks = strucType.split('-')
         firstToken = toks.pop(0)
 
-        if firstToken == "MINE" and Leagues.mines:
+        if firstToken == "MINE":
+            if not Leagues.mines:
+                raise ValueError("MINE NOT ACTIVATED")
+
             if isinstance(struc, Mine):
                 struc.incomeRate += 1
                 if struc.incomeRate > obs.maxMineSize: struc.incomeRate = obs.maxMineSize
             else:
                 obs.setMine(player)
-        elif firstToken == "TOWER" and Leagues.towers:
-            if struc is Tower:
+        elif firstToken == "TOWER":
+            if not Leagues.towers:
+                raise ValueError("TOWERS NOT ACTIVATED")
+
+            if isinstance(struc, Tower):
                 struc.health += Constants.TOWER_HP_INCREMENT
                 if struc.health > Constants.TOWER_HP_MAXIMUM: struc.health = Constants.TOWER_HP_MAXIMUM
             else:
@@ -154,12 +186,12 @@ class Referee(AbstractReferee):
             # }
 
     def processCreeps(self):
-        allCreeps = sorted(flatMap(list(map(lambda player: player.activeCreeps, self.gameManager.activePlayers))),
-                           key=lambda item: item.creepType)
+        # TODO Sorted
+        allCreeps = flatMap(list(map(lambda player: player.activeCreeps, self.gameManager.activePlayers)))
         for _ in range(5):
             for creep in allCreeps:
                 creep.move(1.0 / 5)
-                fixCollisions(self.allEntities(), 1)
+            fixCollisions(self.allEntities(), 1)
 
         for creep in allCreeps:
             creep.dealDamage()
@@ -172,7 +204,8 @@ class Referee(AbstractReferee):
                 if dist_obstacle is None or dist < dist_obstacle:
                     dist_obstacle = dist
                     closestObstacle = obs
-                if closestObstacle.location.distanceTo(creep.location) >= closestObstacle.radius + creep.radius + Constants.TOUCHING_DELTA:
+                if closestObstacle.location.distanceTo(
+                        creep.location) >= closestObstacle.radius + creep.radius + Constants.TOUCHING_DELTA:
                     continue
                 struc = closestObstacle.structure
                 if struc is Mine and struc.owner != creep.owner:
@@ -193,13 +226,12 @@ class Referee(AbstractReferee):
                 if dist_obstacle is None or dist < dist_obstacle:
                     dist_obstacle = dist
                     closestObstacle = obs
-                if closestObstacle.location.distanceTo(queen.location) >= closestObstacle.radius + queen.radius + Constants.TOUCHING_DELTA:
+                if closestObstacle.location.distanceTo(
+                        queen.location) >= closestObstacle.radius + queen.radius + Constants.TOUCHING_DELTA:
                     continue
                 struc = closestObstacle.structure
                 if (struc is Mine or struc is Barracks) and struc.owner != queen.owner:
                     closestObstacle.structure = None
-
-
 
     def player_loop(self, obstaclesAttemptedToBuildUpon, scheduledBuildings):
 
@@ -207,23 +239,58 @@ class Referee(AbstractReferee):
             queen = player.queenUnit
 
             toks = player.outputs[1].split(" ")
-            if toks[0] != "TRAIN":
+
+            if toks.pop(0) != "TRAIN":
                 raise ValueError("Expected TRAIN on the second line")
 
             # Process building creeps
             buildingBarracks: List[Barracks] = []
+            allObstacles: List[Obstacle] = []
             for obstacle in self.obstacles:
-                if toks[1] == obstacle.obstacleId:
-                    # obs = self.obstacles[toks[1]]
-                    if not isinstance(obstacle.structure, Barracks):
-                        raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not a barracks")
-                    if obstacle.structure.owner != player:
-                        raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not owned")
-                    if obstacle.structure.isTraining:
-                        raise ValueError(f"Barracks {obstacle.obstacleId} is training")
-                    buildingBarracks.append(obstacle.structure)
+                for obs in toks:
+                    barracks: Barracks = obstacle.structure
+                    obsId = int(obs)
+                    if obsId == obstacle.obstacleId:
+                        # obs = self.obstacles[toks[1]]
+                        if not isinstance(obstacle.structure, Barracks):
+                            raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not a barracks")
+                        if obstacle.structure.owner != player:
+                            raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not owned")
+                        if obstacle.structure.isTraining:
+                            raise ValueError(f"Barracks {obstacle.obstacleId} is training")
+                        buildingBarracks.append(barracks)
+                        barracks.progress = 0
+                        barracks.isTraining = True
 
-            # remove duplicates
+                        def on_complete(ob):
+                            structure = ob.structure
+                            for iter in range(structure.creepType.count):
+                                if structure.creepType.assetName == KNIGHT.assetName:
+                                    it = KnightCreep(ob.structure.owner)
+                                elif structure.creepType.assetName == ARCHER.assetName:
+                                    it = ArcherCreep(ob.structure.owner)
+                                elif structure.creepType.assetName == GIANT.assetName:
+                                    it = GiantCreep(ob.structure.owner, self.obstacles)
+                                else:
+                                    raise ValueError()
+
+                                c = -1 if ob.structure.owner.isSecondPlayer else 1
+                                it.location = ob.location + Vector2(c * iter, c * iter)
+                                it.finalizeFrame()
+                                it.location = it.location.towards(ob.structure.owner.enemyPlayer.queenUnit.location,
+                                                                  30.0)
+                                it.finalizeFrame()
+                                # it.commitState(0.0)
+                                ob.structure.owner.activeCreeps.append(it)
+
+                        barracks.onComplete = on_complete
+                        obstacle.structure = barracks
+                allObstacles.append(obstacle)
+
+            self.obstacles = allObstacles
+            fixCollisions(self.allEntities())
+
+            # TODO remove duplicates
             # if len(buildingBarracks() > buildingBarracks.toSet().size:
             #     raise ValueError("Training from some barracks more than once")
 
@@ -232,29 +299,6 @@ class Referee(AbstractReferee):
                 raise ValueError("Training too many creeps ($sum total gold requested)")
 
             player.gold -= sumcosts
-
-            for barracks in buildingBarracks:
-                barracks.progress = 0
-                barracks.isTraining = True
-
-                def on_complete():
-                    for iter in barracks.creepType.count:
-                        it = None
-                        if barracks.creepType == KNIGHT:
-                            it = KnightCreep(barracks.owner)
-                        if barracks.creepType == ARCHER:
-                            it = ArcherCreep(barracks.owner)
-                        if barracks.creepType == GIANT:
-                            it = GiantCreep(barracks.owner, self.obstacles)
-
-                        c = -1 if barracks.owner.isSecondPlayer else 1
-                        it.location = barracks.obstacle.location + Vector2(c * iter, c * iter)
-                        it.finalizeFrame()
-                        it.location = it.location.towards(barracks.owner.enemyPlayer.queenUnit.location, 30.0)
-                        it.finalizeFrame()
-                        # it.commitState(0.0)
-                        player.activeCreeps.append(it)
-                    fixCollisions(self.allEntities())
 
             # Process queen command
             line = player.outputs[0].strip()
@@ -278,7 +322,7 @@ class Referee(AbstractReferee):
                 # if obsId not in self.obstacles:
                 #     raise ValueError(f"Site id {obsId} does not exist")
 
-                #list(filter(lambda item: item.obstacleId, self.obstacles))[0]
+                # list(filter(lambda item: item.obstacleId, self.obstacles))[0]
                 obss = list(filter(lambda item: item.obstacleId == obsId, self.obstacles))
                 if len(obss) == 0 or len(obss) > 1:
                     raise ValueError(f"Site id {obsId} does not exist")
@@ -305,7 +349,7 @@ class Referee(AbstractReferee):
         return obstaclesAttemptedToBuildUpon, scheduledBuildings
 
     def gameTurn(self, turn):
-
+        self.turn = turn
         for it in self.gameManager.activePlayers:
             it.goldPerTurn = 0
 
@@ -318,7 +362,6 @@ class Referee(AbstractReferee):
         for it in self.gameManager.activePlayers:
             it.goldPerTurn = Leagues.fixedIncome
             it.gold += Leagues.fixedIncome
-
 
         for player in self.gameManager.activePlayers:
             for it in player.activeCreeps:

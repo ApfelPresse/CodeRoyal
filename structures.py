@@ -17,7 +17,7 @@ class Structure:
         self.owner = owner
         self.obstacle = obstacle
 
-    def onComplete(self):
+    def onComplete(self, ob=None):
         raise ValueError("Not Implemented")
 
     def act(self):
@@ -105,9 +105,14 @@ class Mine(Structure):
 
 class Tower(Structure):
 
+    attackRadius: int
+    health: int
+
     def __init__(self, obstacle, owner, attackRadius, health):
         super().__init__(owner, obstacle)
         self.attackTarget = None
+        self.attackRadius = attackRadius
+        self.health = health
 
     def damageCreep(self, target):
         self._damage(target, Constants.TOWER_CREEP_DAMAGE_MIN, Constants.TOWER_CREEP_DAMAGE_CLIMB_DISTANCE)
@@ -122,35 +127,24 @@ class Tower(Structure):
         target.damage(damage)
 
     def act(self):
-        closestEnemy = min(self.owner.enemyPlayer.activeCreeps, key=lambda x: self.location.distanceTo(x.location))
+        closestEnemy = None
+        closestEnemyDist = None
+        for creep in self.owner.enemyPlayer.activeCreeps:
+            dist = self.location.distanceTo(creep.location)
+            if closestEnemyDist is None or dist < closestEnemyDist:
+                closestEnemyDist = dist
+                closestEnemy = creep
+
         enemyQueen = self.owner.enemyPlayer.queenUnit
         if closestEnemy is not None and closestEnemy.location.distanceTo(self.obstacle.location) < self.attackRadius:
             self.damageCreep(closestEnemy)
-        elif enemyQueen.location.distanceTo(self.obstacle) < self.attackRadius:
+        elif enemyQueen.location.distanceTo(self.obstacle.location) < self.attackRadius:
             self.damageQueen(enemyQueen)
         self.health -= Constants.TOWER_MELT_RATE
         self.attackRadius = int(np.sqrt((self.health * Constants.TOWER_COVERAGE_PER_HP + self.obstacle.area) / np.pi))
         if self.health <= 0:
             return True
         return False
-
-
-# class Barracks(Structure):
-#
-#     def __init__(self, obstacle, owner, creepType, health):
-#         super().__init__(owner, obstacle)
-#         self.isTraining = False
-#         self.progress = 0
-#         self.progressMax = creepType.buildTime
-#
-#     def act(self):
-#         if self.isTraining:
-#             self.progress += 1
-#             if self.progress == self.progressMax:
-#                 self.progress = 0
-#                 self.isTraining = False
-#                 self.onComplete()
-#         return False
 
 class Barracks(Structure):
 
@@ -171,7 +165,7 @@ class Barracks(Structure):
             if self.progress == self.progressMax:
                 self.progress = 0
                 self.isTraining = False
-                self.onComplete()  # create a creep ?
+                self.onComplete(self.obstacle)  # create a creep ?
         return False
 
 
@@ -243,11 +237,12 @@ class Creep(Unit):
         self.health = creepType.hp
 
         # TODO REMOVE MEEEE
-        self.tokenCircle = {}
+        self.tokenCircle = {
+            "baseWidth": self.radius * 2,
+            "baseHeight": self.radius * 2
+        }
         # self.characterSprite = {}
 
-        self.tokenCircle.baseWidth = self.radius * 2
-        self.tokenCircle.baseHeight = self.radius * 2
         # self.characterSprite.image = creepType.assetName
         # self.characterSprite.baseWidth = self.radius * 2
         # self.characterSprite.baseHeight = self.radius * 2
@@ -290,14 +285,17 @@ class GiantCreep(Creep):
         params frames - double, ?
         """
         # TODO (how/where to) get current obstacles ? - set externally?
-        opp_structures = filter(
+        opp_structures = list(filter(
             lambda struct: struct is not None
                            and isinstance(struct, Tower)
                            and struct.owner == self.owner.enemyPlayer,
-            self.obstacles)
-        target = min(opp_structures, key=lambda struct: struct.location.distanceTo(self.location))
+            self.obstacles))
 
-        self.location = self.location.towards(target)
+        if len(opp_structures) == 0:
+            return
+
+        target = min(opp_structures, key=lambda struct: struct.location.distanceTo(self.location))
+        self.location = self.location.towards(target, self.speed * frames)
 
     def dealDamage(self):
         opp_structures = list(filter(
@@ -412,6 +410,8 @@ class ArcherCreep(Creep):
                                                   self.speed * frames)
 
     def finalizeFrame(self):
+        # TODO Character Sprite movement
+        return
         target = self.findTarget()
 
         # TODO REMOVE MEEEEE
@@ -421,34 +421,42 @@ class ArcherCreep(Creep):
         viewportX = {}
         viewportY = {}
 
-        if self.lastLocation is not None:
-            if self.lastLocation.distanceTo(self.location) > 30:
-                movementVector = self.location - self.lastLocation
-            else:
-                movementVector = target.location - self.location
+        # TODO sprite rotation
+        # if self.lastLocation is not None:
+        #     if self.lastLocation.distanceTo(self.location) > 30:
+        #         movementVector = self.location - self.lastLocation
+        #     else:
+        #         movementVector = target.location - self.location
+        #
+        #     characterSprite.rotation = math.atan2(movementVector.y, movementVector.x)
 
-            characterSprite.rotation = math.atan2(movementVector.y, movementVector.x)
-
-        self.lastLocation = self.location
+        # self.lastLocation = self.location
 
         if self.attackTarget is not None:
+            pass
             # TODO REMOVE MEEEEE
             # characterSprite.anchorX = 0.8
             # theEntityManager.commitEntityState(0.3, characterSprite)
             # characterSprite.anchorX = 0.5
             # theEntityManager.commitEntityState(0.4, characterSprite)
 
-            projectile.setRotation((self.attackTarget.location - self.location).angle, Curve.IMMEDIATE)
-            projectile.isVisible = True
-            projectile.setX(self.location.x.toInt() + viewportX.first, Curve.NONE)
-            projectile.setY(self.location.y.toInt() + viewportY.first, Curve.NONE)
-            theEntityManager.commitEntityState(0.4, projectile)
-            projectile.setX(self.attackTarget.location.x.toInt() + viewportX.first, Curve.EASE_IN_AND_OUT)
-            projectile.setY(self.attackTarget.location.y.toInt() + viewportY.first, Curve.EASE_IN_AND_OUT)
-            theEntityManager.commitEntityState(0.99, projectile)
-            projectile.isVisible = False
-            theEntityManager.commitEntityState(1.0, projectile)
+            # projectile.setRotation((self.attackTarget.location - self.location).angle, Curve.IMMEDIATE)
+            # projectile.isVisible = True
+            # projectile.setX(self.location.x.toInt() + viewportX.first, Curve.NONE)
+            # projectile.setY(self.location.y.toInt() + viewportY.first, Curve.NONE)
+            # theEntityManager.commitEntityState(0.4, projectile)
+            # projectile.setX(self.attackTarget.location.x.toInt() + viewportX.first, Curve.EASE_IN_AND_OUT)
+            # projectile.setY(self.attackTarget.location.y.toInt() + viewportY.first, Curve.EASE_IN_AND_OUT)
+            # theEntityManager.commitEntityState(0.99, projectile)
+            # projectile.isVisible = False
+            # theEntityManager.commitEntityState(1.0, projectile)
 
     def findTarget(self) -> Creep:
-        target = min(self.owner.enemyPlayer.activeCreeps, lambda creep: creep.location.distanceTo(self.location))
+        min_dist = None
+        target = None
+        for creep in self.owner.enemyPlayer.activeCreeps:
+            dist = creep.location.distanceTo(self.location)
+            if min_dist is None or dist < min_dist:
+                min_dist = dist
+                target = creep
         return target

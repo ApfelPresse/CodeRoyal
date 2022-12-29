@@ -67,8 +67,8 @@ def buildObstacles() -> List[Obstacle]:
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
         collision_results.append(collisionCheck(obstacles, float(Constants.OBSTACLE_GAP)))
-    if all(collision_results):
-        return obstacles
+    # if all(collision_results):
+    #     return obstacles
     return obstacles
 
 

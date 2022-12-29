@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Constants:
     STARTING_GOLD = 100
 
@@ -46,12 +47,12 @@ class Constants:
 
 
 class Leagues:
-    towers = True
-    giants = True
-    mines = True
-    fixedIncome = None
-    obstacles = Constants.OBSTACLE_PAIRS[-1]
-    queenHp = 100
+    towers: bool = True
+    giants: bool = True
+    mines: bool = True
+    fixedIncome: int = 0
+    obstacles: np.array = Constants.OBSTACLE_PAIRS[-1]
+    queenHp: int = 100
 
 
 class CreepType:
@@ -61,7 +62,10 @@ class CreepType:
         self.count = count
         self.cost = cost
         self.speed = speed
+
         self.range = range_
+        self.attackRange = range_
+
         self.radius = radius
         self.mass = mass
         self.hp = hp
