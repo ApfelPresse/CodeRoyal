@@ -1,8 +1,8 @@
 from typing import List
 
-from MapBuilding import buildMap, fixCollisions, flatMap, sample
-from Player import Player
+from map_building import buildMap, fixCollisions, flatMap, sample
 from constants import Leagues, Constants, KNIGHT, ARCHER, GIANT
+from player import Player
 from structures import Obstacle, Barracks, Mine, Tower, Queen, GiantCreep, KnightCreep, ArcherCreep
 from vector2 import Vector2
 
@@ -296,7 +296,7 @@ class Referee(AbstractReferee):
 
             sumcosts = sum(map(lambda item: item.creepType.cost, buildingBarracks))
             if sumcosts > player.gold:
-                raise ValueError("Training too many creeps ($sum total gold requested)")
+                raise ValueError(f"Training too many creeps ({sumcosts} total gold requested and player has {player.gold})")
 
             player.gold -= sumcosts
 

@@ -3,9 +3,9 @@ import unittest
 
 import numpy as np
 
-from Ref import Referee
+from ref import Referee
 from structures import Tower
-from test_main import convert_to_gif, plot_current_frame
+from run import convert_to_gif, plot_current_frame
 from vector2 import Vector2
 
 
@@ -15,6 +15,38 @@ class Test(unittest.TestCase):
         seed_value = 6
         random.seed(seed_value)
         np.random.seed(seed_value)
+
+    def test_tower_attacking_queen(self):
+        ref = Referee(params={
+            "leagueLevel": 3
+        })
+        # frames = []
+
+        for i in range(40):
+            print(f"Turn {i}")
+            for player in ref.gameManager.activePlayers:
+                if player.name == "red":
+                    action = "BUILD 5 TOWER"
+                    train = "TRAIN"
+                else:
+                    action = "BUILD 1 TOWER"
+                    train = "TRAIN"
+
+                player.outputs = [action, train]
+
+            # frames.append(plot_current_frame(ref))
+
+            ref.gameTurn(i)
+
+        queen_health = {
+            "red": 35,
+            "blue": 80,
+        }
+        for player in ref.gameManager.activePlayers:
+
+            assert queen_health[player.name] == player.queenUnit.health
+
+        # convert_to_gif("test_move", frames)
 
     def test_build_tower_once_and_wait_for_destroying(self):
         ref = Referee(params={

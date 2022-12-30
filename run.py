@@ -4,7 +4,7 @@ import imageio
 import numpy as np
 from matplotlib import pyplot as plt
 
-from Ref import Referee
+from ref import Referee
 from constants import Constants
 from structures import Tower, Mine, Barracks
 

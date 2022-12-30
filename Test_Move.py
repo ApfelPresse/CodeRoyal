@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from Ref import Referee
+from ref import Referee
 from vector2 import Vector2
 
 

@@ -4,7 +4,7 @@ from typing import List
 
 import numpy as np
 
-from Player import Player
+from player import Player
 from constants import Constants, CreepType, GIANT, KNIGHT, ARCHER
 from vector2 import Vector2
 
@@ -130,7 +130,7 @@ class Tower(Structure):
         closestEnemy = None
         closestEnemyDist = None
         for creep in self.owner.enemyPlayer.activeCreeps:
-            dist = self.location.distanceTo(creep.location)
+            dist = self.obstacle.location.distanceTo(creep.location)
             if closestEnemyDist is None or dist < closestEnemyDist:
                 closestEnemyDist = dist
                 closestEnemy = creep
@@ -140,6 +140,7 @@ class Tower(Structure):
             self.damageCreep(closestEnemy)
         elif enemyQueen.location.distanceTo(self.obstacle.location) < self.attackRadius:
             self.damageQueen(enemyQueen)
+        #self.health = min(0, self.health - Constants.TOWER_MELT_RATE)
         self.health -= Constants.TOWER_MELT_RATE
         self.attackRadius = int(np.sqrt((self.health * Constants.TOWER_COVERAGE_PER_HP + self.obstacle.area) / np.pi))
         if self.health <= 0:
@@ -286,40 +287,31 @@ class GiantCreep(Creep):
         """
         # TODO (how/where to) get current obstacles ? - set externally?
         opp_structures = list(filter(
-            lambda struct: struct is not None
-                           and isinstance(struct, Tower)
-                           and struct.owner == self.owner.enemyPlayer,
+            lambda struct: struct.structure is not None
+                           and isinstance(struct.structure, Tower)
+                           and struct.structure.owner == self.owner.enemyPlayer,
             self.obstacles))
 
         if len(opp_structures) == 0:
             return
 
-        target = min(opp_structures, key=lambda struct: struct.location.distanceTo(self.location))
+        target = min(opp_structures, key=lambda struct: struct.location.distanceTo(self.location)).location
         self.location = self.location.towards(target, self.speed * frames)
 
     def dealDamage(self):
-        opp_structures = list(filter(
-            lambda struct: struct is not None
-                           and isinstance(struct, Tower)
-                           and struct.owner == self.owner.enemyPlayer
-                           and struct.location.distanceTo(
-                self.location) < self.radius + struct.radius + Constants.TOUCHING_DELTA,
-            self.obstacles))
-        if len(opp_structures) == 0:
+        target = None
+        for obs in self.obstacles:
+            if obs.structure is None or obs.structure.owner != self.owner.enemyPlayer or not isinstance(obs.structure, Tower):
+                continue
+            dist = obs.location.distanceTo(self.location)
+            if dist >= self.radius + obs.radius + Constants.TOUCHING_DELTA:
+                continue
+            target = obs
+            break
+        if target is None:
             return
-        target = opp_structures[0]
-        # target should be a tower
-        target.health -= Constants.GIANT_BUST_RATE
-        creepToTower = target.location - self.location
 
-        # TODO REMOVE ME
-        # characterSprite = {}
-        # theEntityManager = {}
-        #
-        # characterSprite.location = creepToTower.resizedTo(self.radius)
-        # theEntityManager.commitEntityState(0.2, characterSprite)
-        # characterSprite.location = Vector2(0, 0)
-        # theEntityManager.commitEntityState(1.0, characterSprite)
+        target.structure.health = min(0, target.structure.health - Constants.GIANT_BUST_RATE)
 
     def finalizeFrame(self):
         pass
