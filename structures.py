@@ -1,11 +1,10 @@
-import math
 from abc import abstractmethod
 from typing import List
 
 import numpy as np
 
-from player import Player
 from constants import Constants, CreepType, GIANT, KNIGHT, ARCHER
+from player import Player
 from vector2 import Vector2
 
 nextObstacleId = 0
@@ -158,8 +157,6 @@ class Barracks(Structure):
         self.progress = 0
         self.isTraining = False
 
-        # 'var onComplete: () -> Unit = {}  ## << ??
-
     def act(self):
         if self.isTraining:
             self.progress += 1
@@ -204,13 +201,6 @@ class Queen(Unit):
             "baseHeight": self.radius * 2
         }
 
-        # TODO REMOVE ME
-        # self.characterSprite = {}
-        # self.characterSprite.image = "Unite_Reine"
-        # theTooltipModule.registerEntity(tokenGroup, mapOf("type" to "Queen"))
-        # self.characterSprite.baseWidth = self.radius * 2
-        # self.characterSprite.baseHeight = self.radius * 2
-
     def moveTowards(self, target: Vector2):
         """
         param target - Vector2
@@ -242,13 +232,6 @@ class Creep(Unit):
             "baseWidth": self.radius * 2,
             "baseHeight": self.radius * 2
         }
-        # self.characterSprite = {}
-
-        # self.characterSprite.image = creepType.assetName
-        # self.characterSprite.baseWidth = self.radius * 2
-        # self.characterSprite.baseHeight = self.radius * 2
-
-        # theTooltipModule.registerEntity(tokenGroup,mapOf("type" to creepType.toString()))
 
     @abstractmethod
     def finalizeFrame(self):
@@ -331,18 +314,6 @@ class KnightCreep(Creep):
         if self.location.distanceTo(
                 enemyQueen.location) < self.radius + enemyQueen.radius + self.attackRange + Constants.TOUCHING_DELTA:
             self.attacksThisTurn = True
-
-            # TODO REMOVE ME
-            # self.characterSprite = {}
-            # self.theEntityManager = {}
-            #
-            # self.characterSprite.setAnchorX(0.5, Curve.IMMEDIATE)
-            # self.theEntityManager.commitEntityState(0.4, self.characterSprite)
-            # self.characterSprite.anchorX = 0.2
-            # self.theEntityManager.commitEntityState(0.7, self.characterSprite)
-            # self.characterSprite.anchorX = 0.5
-            # self.theEntityManager.commitEntityState(1.0, self.characterSprite)
-
             self.owner.enemyPlayer.health -= Constants.KNIGHT_DAMAGE
 
     def move(self, frames: float):
@@ -354,20 +325,9 @@ class KnightCreep(Creep):
                 self.speed * frames)
 
     def finalizeFrame(self):
-        if self.lastLocation is not None:
+        # TODO animation etc.
+        return
 
-            last = self.lastLocation.copy()
-
-            if last.distanceTo(self.location) > 30 and not self.attacksThisTurn:
-                movementVector = self.location - last
-            else:
-                movementVector = self.owner.enemyPlayer.queenUnit.location - self.location
-
-            # TODO REMOVE MEEE
-            # characterSprite = {}
-            # characterSprite.rotation = movementVector.angle
-
-        self.lastLocation = self.location
 
 
 class ArcherCreep(Creep):
@@ -378,7 +338,6 @@ class ArcherCreep(Creep):
         self.lastLocation = None
         self.attacksThisTurn = False
         self.attackTarget = None
-        # projectile = theEntityManager.createSprite()!!.setZIndex(60).setImage("Fleche_$color").setVisible(false).setAnchorX(1.0).setAnchorY(0.5)
 
     def dealDamage(self):
         target = self.findTarget()
@@ -404,44 +363,6 @@ class ArcherCreep(Creep):
     def finalizeFrame(self):
         # TODO Character Sprite movement
         return
-        target = self.findTarget()
-
-        # TODO REMOVE MEEEEE
-        # characterSprite = {}
-        # theEntityManager = {}
-        projectile = {}
-        viewportX = {}
-        viewportY = {}
-
-        # TODO sprite rotation
-        # if self.lastLocation is not None:
-        #     if self.lastLocation.distanceTo(self.location) > 30:
-        #         movementVector = self.location - self.lastLocation
-        #     else:
-        #         movementVector = target.location - self.location
-        #
-        #     characterSprite.rotation = math.atan2(movementVector.y, movementVector.x)
-
-        # self.lastLocation = self.location
-
-        if self.attackTarget is not None:
-            pass
-            # TODO REMOVE MEEEEE
-            # characterSprite.anchorX = 0.8
-            # theEntityManager.commitEntityState(0.3, characterSprite)
-            # characterSprite.anchorX = 0.5
-            # theEntityManager.commitEntityState(0.4, characterSprite)
-
-            # projectile.setRotation((self.attackTarget.location - self.location).angle, Curve.IMMEDIATE)
-            # projectile.isVisible = True
-            # projectile.setX(self.location.x.toInt() + viewportX.first, Curve.NONE)
-            # projectile.setY(self.location.y.toInt() + viewportY.first, Curve.NONE)
-            # theEntityManager.commitEntityState(0.4, projectile)
-            # projectile.setX(self.attackTarget.location.x.toInt() + viewportX.first, Curve.EASE_IN_AND_OUT)
-            # projectile.setY(self.attackTarget.location.y.toInt() + viewportY.first, Curve.EASE_IN_AND_OUT)
-            # theEntityManager.commitEntityState(0.99, projectile)
-            # projectile.isVisible = False
-            # theEntityManager.commitEntityState(1.0, projectile)
 
     def findTarget(self) -> Creep:
         min_dist = None

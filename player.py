@@ -22,18 +22,10 @@ class Player(AbstractPlayer):
             "",
         ]
 
-        # original line:
-        # 'var health by nonNegative<Player>(100).andAlso { if (score >= 0) score = it }'
         self.health = None
-        self.score = -2  # := self.health ?
+        self.score = -2
         self.gold = Constants.STARTING_GOLD
-        self.goldPerTurn = 0  # << this looks kinda bad ..
-        # self.hud = None
-
-    # def getExpectedOutputLines: return 2
-    # def fixOwner(self, player): raise NotImplementedError()
-    # def printObstacleInit(self, obstacle): raise NotImplementedError()
-    # def printObstaclePerTurn(self, obstacle): raise NotImplementedError()
+        self.goldPerTurn = 0
 
     def allUnits(self):
         ent = []
@@ -45,8 +37,6 @@ class Player(AbstractPlayer):
         self.queenUnit.health = self.health  # << really ?? double bookkeeping here.
         if self.health == 0:
             raise Exception("DEAD QUEEN")
-            # self.deactivate("Dead queen")
-        # self.hud.update()
 
     def kill(self, reason):
         self.score = -1

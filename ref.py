@@ -1,7 +1,7 @@
 from typing import List
 
-from map_building import buildMap, fixCollisions, flatMap, sample
 from constants import Leagues, Constants, KNIGHT, ARCHER, GIANT
+from map_building import buildMap, fixCollisions, flatMap, sample
 from player import Player
 from structures import Obstacle, Barracks, Mine, Tower, Queen, GiantCreep, KnightCreep, ArcherCreep
 from vector2 import Vector2
@@ -44,10 +44,7 @@ class Referee(AbstractReferee):
 
         self.end_game = False
         self.turn = 0
-        # Now, this gets interesting.
-        # are Kotlin and Python RNGs 'compatible'?!?
-        # self.theRandom = Random(int(params['seed'])) if params['seed'] else Random()
-
+       
         if "leagueLevel" in params:
             self.gameManager.leagueLevel = params["leagueLevel"]
 
@@ -86,19 +83,7 @@ class Referee(AbstractReferee):
             activePlayer.queenUnit = Queen(activePlayer)
             activePlayer.queenUnit.location = corner
 
-        # for e in self.allEntities():
-        #     if e is None:
-        #         print()
-
         fixCollisions(self.allEntities())
-
-        # for p in self.gameManager.activePlayers:
-        #    p.hud.update()
-        #    p.sendInputLine(len(self.obstacles))
-        #    for o in self.obstacles:
-        #        p.printObstacleInit(o)
-
-        # return params
 
     def get_buildings_of_player(self, player) -> List[Obstacle]:
         buildings = []
@@ -173,17 +158,6 @@ class Referee(AbstractReferee):
         if len(obstaclesAttemptedToBuildUpon) == 2 and obstaclesAttemptedToBuildUpon[0] == \
                 obstaclesAttemptedToBuildUpon[1]:
             del scheduledBuildings[turn % 2]
-
-            # Execute builds that remain TODO do we need this ?
-            # scheduledBuildings.forEach { (player: Player, callback: () -> kotlin.Unit) ->
-            #     try { callback.invoke() }
-            #     catch (e: PlayerInputException) {
-            #         System.err.println("WARNING: Deactivating ${player.nicknameToken} because of:")
-            #     e.printStackTrace()
-            #     player.kill("${e.message}")
-            #     gameManager.addToGameSummary("${player.nicknameToken}: ${e.message}")
-            #     }
-            # }
 
     def processCreeps(self):
         # TODO Sorted
@@ -296,7 +270,8 @@ class Referee(AbstractReferee):
 
             sumcosts = sum(map(lambda item: item.creepType.cost, buildingBarracks))
             if sumcosts > player.gold:
-                raise ValueError(f"Training too many creeps ({sumcosts} total gold requested and player has {player.gold})")
+                raise ValueError(
+                    f"Training too many creeps ({sumcosts} total gold requested and player has {player.gold})")
 
             player.gold -= sumcosts
 

@@ -18,13 +18,11 @@ def collisionCheck(entities: List[FieldObject], acceptableGap: float = 0.0) -> b
         u1.location = u1.location.clampWithin(clampDist, Constants.WORLD_WIDTH - clampDist, clampDist,
                                               Constants.WORLD_HEIGHT - clampDist)
 
-        u2_results = []
         for iu2, u2 in enumerate(entities):
             if iu1 == iu2:
                 continue
             overlap = u1.radius + u2.radius + acceptableGap - u1.location.distanceTo(u2.location)  # TODO: Fix this?
             if overlap <= 1e-6:
-                # u2_results.append(False)
                 continue
             else:
                 if u1.mass == 0 and u2.mass == 0:
@@ -40,8 +38,6 @@ def collisionCheck(entities: List[FieldObject], acceptableGap: float = 0.0) -> b
                 u1.location -= u1tou2.resizedTo(d1 * overlap + 0.0 if (u1.mass == 0 and u2.mass > 0) else gap)
                 u2.location += u1tou2.resizedTo(d2 * overlap + 0.0 if (u2.mass == 0 and u1.mass > 0) else gap)
                 return True
-                # u2_results.append(True)
-                # continue
     return False
 
 
@@ -67,8 +63,6 @@ def buildObstacles() -> List[Obstacle]:
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
         collision_results.append(collisionCheck(obstacles, float(Constants.OBSTACLE_GAP)))
-    # if all(collision_results):
-    #     return obstacles
     return obstacles
 
 
@@ -76,9 +70,6 @@ def sample(list_like):
     """uses global <theRandom>
     """
     return random.choice(list_like)
-
-
-# def buildMap():
 
 
 def buildMap() -> List[Obstacle]:
