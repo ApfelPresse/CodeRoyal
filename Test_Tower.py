@@ -5,8 +5,6 @@ import numpy as np
 
 from ref import Referee
 from structures import Tower
-from run import convert_to_gif, plot_current_frame
-from vector2 import Vector2
 
 
 class Test(unittest.TestCase):
@@ -43,7 +41,6 @@ class Test(unittest.TestCase):
             "blue": 80,
         }
         for player in ref.gameManager.activePlayers:
-
             assert queen_health[player.name] == player.queenUnit.health
 
         # convert_to_gif("test_move", frames)

@@ -4,8 +4,6 @@ import unittest
 import numpy as np
 
 from ref import Referee
-from structures import Tower
-from run import convert_to_gif, plot_current_frame
 from vector2 import Vector2
 
 

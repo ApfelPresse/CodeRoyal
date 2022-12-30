@@ -56,4 +56,3 @@ class Test(unittest.TestCase):
 
         assert ref.gameManager.players[0].queenUnit.location == Vector2(485, 501)
         assert ref.gameManager.players[1].queenUnit.location == Vector2(505, 500)
-
