@@ -140,3 +140,52 @@ class Test(unittest.TestCase):
             assert len(buildings) == 1
 
         # convert_to_gif("test_move", frames)
+
+    def test_build_barracks_knight_and_tower(self):
+        ref = Referee(params={
+            "leagueLevel": 3
+        })
+        # frames = []
+
+        for player in ref.gameManager.activePlayers:
+            player.gold = 200
+
+        for i in range(60):
+            print(f"Turn {i}")
+            for player in ref.gameManager.activePlayers:
+                action = "WAIT"
+                train = "TRAIN"
+                if player.name == "red":
+                    if i <= 3:
+                        action = "BUILD 2 BARRACKS-KNIGHT"
+                    if 3 < i < 20:
+                        action = "BUILD 6 TOWER"
+
+                    if i == 4 or i == 20:
+                        train += " 2"
+                else:
+                    if i <= 3:
+                        action = "BUILD 1 BARRACKS-KNIGHT"
+                    if 3 < i < 20:
+                        action = "BUILD 5 TOWER"
+                    if i == 4 or i == 20:
+                        train += " 1"
+
+                player.outputs = [action, train]
+
+            # if i % 3 == 0:
+            #     frames.append(plot_current_frame(ref))
+            ref.gameTurn(i)
+
+        queen = {
+            "blue": {
+                "health": 60
+            },
+            "red": {
+                "health": 62
+            }
+        }
+
+        for player in ref.gameManager.activePlayers:
+            assert queen[player.name]["health"] == player.health
+        # convert_to_gif("test_move", frames)
