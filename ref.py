@@ -274,8 +274,8 @@ class Referee(AbstractReferee):
 
             sumcosts = sum(map(lambda item: item.creepType.cost, buildingBarracks))
             if sumcosts > player.gold:
-                raise ValueError(
-                    f"Training too many creeps ({sumcosts} total gold requested and player has {player.gold})")
+                print(f"WARNING: Player {player.name} - Training too many creeps ({sumcosts} total gold requested and player has {player.gold})")
+                continue
 
             player.gold -= sumcosts
 

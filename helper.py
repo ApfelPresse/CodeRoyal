@@ -23,11 +23,6 @@ def plot_current_frame(ref, frame=0):
 
     ax.add_patch(plt.Circle((width // 2, height // 2), 500, color="white", alpha=0, zorder=0))
 
-    background = plt.imread("sprites/hintergrund.png")
-    axin = ax.inset_axes([-width / 2, -height / 2, width * 2, height * 2], transform=ax.transData, zorder=0)
-    axin.imshow(background)
-    axin.axis('off')
-
     background = plt.imread("spriteso/Background.jpg")
     axin = ax.inset_axes([0, 0, width, height], transform=ax.transData, zorder=1)
     axin.imshow(background)
@@ -53,7 +48,7 @@ def plot_current_frame(ref, frame=0):
 
         for creep in player.activeCreeps:
             ax.add_patch(
-                plt.Circle((creep.location.x, creep.location.y), 15, color=player.name, alpha=0.9, zorder=6))
+                plt.Circle((creep.location.x, creep.location.y), 10, color=player.name, alpha=0.9, zorder=6))
 
     for obstacle in ref.obstacles:
         width = 120
@@ -67,8 +62,9 @@ def plot_current_frame(ref, frame=0):
             tower = game_json[f"T{obstacle.structure.owner.name[0].upper()}{tower_idx:02d}"]["image"]
             axin.imshow(tower)
             ax.add_patch(
-                plt.Circle((x, y), obstacle.structure.attackRadius, color=obstacle.structure.owner.name, alpha=0.2,
+                plt.Circle((x, y), obstacle.structure.attackRadius, color=obstacle.structure.owner.name, alpha=0.1,
                            zorder=100))
+
         if isinstance(obstacle.structure, Mine):
             axin.imshow(game_json["Mine"]["image"])
 

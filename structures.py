@@ -412,7 +412,7 @@ class Player(AbstractPlayer):
 
         if struc is None:
             struc_info = {
-                "type": None
+                "type": -1
             }
         elif isinstance(struc, Mine):
             struc_info = {
@@ -443,6 +443,9 @@ class Player(AbstractPlayer):
         return {**struc_info, **{
             "id": obstacle.obstacleId,
             "gold": obstacle.gold if visible else -1,
+            "x": obstacle.location.x,
+            "y": obstacle.location.y,
+            "radius": obstacle.radius,
             "max_mine_size": obstacle.maxMineSize if visible else -1,
         }}
 

@@ -18,6 +18,7 @@ def collisionCheck(entities: List[FieldObject], acceptableGap: float = 0.0) -> b
         u1.location = u1.location.clampWithin(clampDist, Constants.WORLD_WIDTH - clampDist, clampDist,
                                               Constants.WORLD_HEIGHT - clampDist)
 
+        u1.location.check_if_not_smaller_zero()
         for iu2, u2 in enumerate(entities):
             if iu1 == iu2:
                 continue
@@ -37,6 +38,9 @@ def collisionCheck(entities: List[FieldObject], acceptableGap: float = 0.0) -> b
                 gap = 20.0 if u1.mass == 0 and u2.mass == 0 else 1.0
                 u1.location -= u1tou2.resizedTo(d1 * overlap + 0.0 if (u1.mass == 0 and u2.mass > 0) else gap)
                 u2.location += u1tou2.resizedTo(d2 * overlap + 0.0 if (u2.mass == 0 and u1.mass > 0) else gap)
+
+                u1.location.check_if_not_smaller_zero()
+                u2.location.check_if_not_smaller_zero()
                 return True
     return False
 
