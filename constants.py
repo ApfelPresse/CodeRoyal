@@ -56,9 +56,20 @@ class Leagues:
 
 
 class CreepType:
+    ordinal: int
+    count: int
+    cost: int
+    speed: int
+    range: int
+    attackRange: int
+    radius: int
+    mass: int
+    hp: int
+    buildTime: int
+    assetName: str
 
-    def __init__(self, count, cost, speed, range_, radius, mass, hp, buildTime, assetName):
-        super().__init__()
+    def __init__(self, count, cost, speed, range_, radius, mass, hp, buildTime, assetName, ordinal=-1):
+        self.ordinal = ordinal
         self.count = count
         self.cost = cost
         self.speed = speed
@@ -82,6 +93,6 @@ class Curve:
     DEFAULT = LINEAR
 
 
-KNIGHT = CreepType(4, 80, 100, 0, 20, 400, 30, 5, "Unite_Fantassin")
-ARCHER = CreepType(2, 100, 75, 200, 25, 900, 45, 8, "Unite_Archer")
-GIANT = CreepType(1, 140, 50, 0, 40, 2000, 200, 10, "Unite_Siege")
+KNIGHT = CreepType(4, 80, 100, 0, 20, 400, 30, 5, "Unite_Fantassin", 0)
+ARCHER = CreepType(2, 100, 75, 200, 25, 900, 45, 8, "Unite_Archer", 1)
+GIANT = CreepType(1, 140, 50, 0, 40, 2000, 200, 10, "Unite_Siege", 2)

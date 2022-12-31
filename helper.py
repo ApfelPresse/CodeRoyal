@@ -1,57 +1,54 @@
+import json
+
 import imageio
 import numpy as np
+from PIL import Image
 from matplotlib import pyplot as plt
 
 from constants import Constants
 from structures import Tower, Mine, Barracks
 
 
-def plot_current_frame(ref):
-    scale = 2
+def plot_current_frame(ref, frame=0):
+    scale = 4
     fig, ax = plt.subplots(figsize=(4 * scale, 3 * scale))
 
-    height = Constants.WORLD_HEIGHT + Constants.WORLD_HEIGHT / 2
     width = Constants.WORLD_WIDTH
+    height = Constants.WORLD_HEIGHT
 
     ax.set_xlim((0, width))
     ax.set_ylim((0, height))
-
-    image = plt.imread("sprites/hintergrund.png")
-    axin = ax.inset_axes([-width / 2, -height / 2, width * 2, height * 2], transform=ax.transData, zorder=0)
-    axin.imshow(image)
-    axin.axis('off')
-
+    ax.axis("equal")
     ax.axis('off')
 
-    sprite_gelaende_1 = plt.imread("sprites/sprite_gelaende_1.png")
-    queen_blue = plt.imread("sprites/queen_blue.png")
-    queen_red = plt.imread("sprites/queen_red.png")
-    tower = plt.imread("sprites/tower.png")
-    mine = plt.imread("sprites/mine.png")
-    barracks = plt.imread("sprites/barracks.png")
+    ax.add_patch(plt.Circle((width // 2, height // 2), 500, color="white", alpha=0, zorder=0))
 
-    for obstacle in ref.obstacles:
-        c = "b"
-        if obstacle.structure is not None:
-            c = "y"
+    background = plt.imread("sprites/hintergrund.png")
+    axin = ax.inset_axes([-width / 2, -height / 2, width * 2, height * 2], transform=ax.transData, zorder=0)
+    axin.imshow(background)
+    axin.axis('off')
 
-        width = 120
-        axin = ax.inset_axes([obstacle.location.x - width / 2, obstacle.location.y - width / 2, width, width],
-                             transform=ax.transData, zorder=1)
-        axin.imshow(sprite_gelaende_1)
-        axin.axis('off')
+    background = plt.imread("spriteso/Background.jpg")
+    axin = ax.inset_axes([0, 0, width, height], transform=ax.transData, zorder=1)
+    axin.imshow(background)
+    axin.axis('off')
 
-        ax.add_patch(plt.Circle((obstacle.location.x, obstacle.location.y), 20, color=c, alpha=0.8))
+    with open("spriteso/game.json", "r") as file:
+        game_json = json.loads(file.read())["frames"]
+
+    game_image = Image.open("spriteso/game.png")
+    for key in game_json.keys():
+        item = game_json[key]["frame"]
+        im = game_image.crop((item["x"], item["y"], item["x"] + item["w"], item["y"] + item["h"]))
+        game_json[key]["image"] = im
+        # im.save(f'spriteso/tmp/{key}.png')
 
     for i, player in enumerate(ref.gameManager.players):
         width = 80
         x = player.queenUnit.location.x
         y = player.queenUnit.location.y
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=5)
-        if i == 0:
-            axin.imshow(queen_blue)
-        else:
-            axin.imshow(queen_red)
+        axin.imshow(game_json["Unite_Reine"]["image"])
         axin.axis('off')
 
         for creep in player.activeCreeps:
@@ -63,19 +60,26 @@ def plot_current_frame(ref):
         x = obstacle.location.x
         y = obstacle.location.y
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=2)
+        axin.axis('off')
 
         if isinstance(obstacle.structure, Tower):
+            tower_idx = (frame % 15) + 1
+            tower = game_json[f"T{obstacle.structure.owner.name[0].upper()}{tower_idx:02d}"]["image"]
             axin.imshow(tower)
             ax.add_patch(
                 plt.Circle((x, y), obstacle.structure.attackRadius, color=obstacle.structure.owner.name, alpha=0.2,
                            zorder=100))
         if isinstance(obstacle.structure, Mine):
-            axin.imshow(mine)
+            axin.imshow(game_json["Mine"]["image"])
 
         if isinstance(obstacle.structure, Barracks):
-            axin.imshow(barracks)
+            if obstacle.structure.owner.name == "red":
+                axin.imshow(game_json["Caserne_Rouge"]["image"])
+            else:
+                axin.imshow(game_json["Caserne_Bleu"]["image"])
 
-        axin.axis('off')
+        if obstacle.structure is None:
+            axin.imshow(game_json[f"LC_{obstacle.obstacle_tile_id}"]["image"])
 
     player_stats = []
     for i, player in enumerate(ref.gameManager.players):
@@ -87,7 +91,7 @@ def plot_current_frame(ref):
     player_stats_zip = list(map(lambda items: "-".join(map(str, items)), zip(*player_stats)))
 
     msg = "\n".join([f"Gameturn {ref.turn}"] + player_stats_zip)
-    ax.text(0, height - height / 4, msg, fontsize=10, bbox={'facecolor': 'white', 'alpha': 0, 'pad': 5})
+    ax.text(width / 2, height, msg, fontsize=10, bbox={'facecolor': 'white', 'alpha': 0, 'pad': 5})
 
     fig.canvas.draw()
     image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')

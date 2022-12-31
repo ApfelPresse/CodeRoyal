@@ -4,6 +4,7 @@ import numpy as np
 
 from helper import plot_current_frame, convert_to_gif
 from ref import Referee
+from structures import Obstacle
 
 if __name__ == '__main__':
 
@@ -21,13 +22,40 @@ if __name__ == '__main__':
     try:
         for i in range(ref.gameManager.maxTurns):
             print(f"Round {i}")
+
+            # for player in self.gameManager.players:
+            #     ent.extend(player.allUnits())
+
             for j, player in enumerate(ref.gameManager.activePlayers):
+
+                obs_for_player = []
+                touching_side: Obstacle = None
+                for obs in ref.obstacles:
+                    if player.queenUnit.is_in_range_of(obs):
+                        touching_side = obs
+                    obs_for_player.append(player.printObstaclePerTurn(obs))
+
+                units = list(map(lambda item: {
+                    "x": item.location.x,
+                    "y": item.location.y,
+                    "owner": player.fixOwner(item.owner),
+                    "unit_type": item.unit_type,
+                    "health": item.health,
+                }, ref.all_units()))
+                # ref.
+                info = {
+                    "gold": player.gold,
+                    "queen_touching": touching_side.obstacleId if touching_side is not None else -1,
+                    "obstacles": obs_for_player,
+                    "units": []
+                }
+
                 if j == 0:
                     side = 1
                 else:
                     side = 4
 
-                b = f"MOVE 500 500"
+                b = f"BUILD {side} TOWER"
                 t = "TRAIN"
 
                 # if i <= tix:
@@ -46,10 +74,10 @@ if __name__ == '__main__':
                     t,
                 ]
 
-            if i > 0 and i % 2 == 0:
-                frames.append(plot_current_frame(ref))
+            if i % 2 == 0:
+                frames.append(plot_current_frame(ref, i))
 
-            if i == 30:
+            if i > 10:
                 break
             ref.gameTurn(i)
     finally:

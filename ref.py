@@ -2,8 +2,7 @@ from typing import List
 
 from constants import Leagues, Constants, KNIGHT, ARCHER, GIANT
 from map_building import buildMap, fixCollisions, flatMap, sample
-from player import Player
-from structures import Obstacle, Barracks, Mine, Tower, Queen, GiantCreep, KnightCreep, ArcherCreep
+from structures import Obstacle, Barracks, Mine, Tower, Queen, GiantCreep, KnightCreep, ArcherCreep, Player, Unit
 from vector2 import Vector2
 
 
@@ -44,7 +43,7 @@ class Referee(AbstractReferee):
 
         self.end_game = False
         self.turn = 0
-       
+
         if "leagueLevel" in params:
             self.gameManager.leagueLevel = params["leagueLevel"]
 
@@ -92,11 +91,16 @@ class Referee(AbstractReferee):
                 buildings.append(ent)
         return buildings
 
+    def all_units(self) -> List[Unit]:
+        units = []
+        for player in self.gameManager.players:
+            units.extend(player.allUnits())
+        return units
+
     def allEntities(self):
         ent = []
         ent.extend(self.obstacles)
-        for player in self.gameManager.players:
-            ent.extend(player.allUnits())
+        ent.extend(self.all_units())
         return ent
         # return [u for p in self.gameManager.players for u in p.allUnits()] + self.obstacles
 
@@ -305,8 +309,9 @@ class Referee(AbstractReferee):
                 obs = obss[0]
                 strucType = toks.pop(0)
 
-                dist = obs.location.distanceTo(queen.location)
-                if dist < queen.radius + obs.radius + Constants.TOUCHING_DELTA:
+                # dist = obs.location.distanceTo(queen.location)
+                # if dist < queen.radius + obs.radius + Constants.TOUCHING_DELTA:
+                if queen.is_in_range_of(obs):
                     obstaclesAttemptedToBuildUpon, scheduledBuildings = self.scheduleBuilding(player, obs,
                                                                                               strucType,
                                                                                               obstaclesAttemptedToBuildUpon,
