@@ -84,12 +84,20 @@ class Referee(AbstractReferee):
 
         fixCollisions(self.allEntities())
 
+
+
     def get_buildings_of_player(self, player) -> List[Obstacle]:
         buildings = []
         for ent in self.obstacles:
             if ent.structure is not None and ent.structure.owner.name == player.name:
                 buildings.append(ent)
         return buildings
+
+    def game_end(self):
+        for player in self.gameManager.players:
+            if player.queenUnit.health <= 0:
+                return True
+        return False
 
     def all_units(self) -> List[Unit]:
         units = []

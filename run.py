@@ -1,49 +1,12 @@
-import math
 import random
 
 import numpy as np
 
+from boss import handle_boss_3, handle_boss_2
 from helper import plot_current_frame, convert_to_gif
 from ref import Referee
 from structures import Obstacle
 
-
-def handle_boss_1(last, game_info):
-    queen = ()
-    for unit in game_info["units"]:
-        if unit["type"] == -1 and unit["owner"] == 0:
-            queen = (unit["x"], unit["y"])
-
-    min_dist = None
-    barracks = None
-    for obs in game_info["obstacles"]:
-        dist = math.sqrt((queen[0] - obs["x"]) ** 2 + (queen[1] - obs["y"]) ** 2)
-        if min_dist is None or dist < min_dist:
-            min_dist = dist
-            barracks = obs
-
-    action = "WAIT"
-    if barracks["type"] == -1:
-        action = f"BUILD {barracks['id']} BARRACKS-KNIGHT"
-
-    if "count" not in last:
-        count = 0
-    else:
-        count = last["count"]
-
-    count += 1
-    train = "TRAIN"
-    if count == 12:
-        count = 0
-        if barracks["type"] == 2:
-            train = f"{train} {barracks['id']}"
-
-    last["count"] = count
-
-    return last, [
-        action,
-        train
-    ]
 
 def main():
     seed_value = 6
@@ -59,8 +22,8 @@ def main():
     tix = 20
 
     players = {
-        "red": handle_boss_1,
-        "blue": handle_boss_1,
+        "red": handle_boss_3,
+        "blue": handle_boss_2,
     }
     last = {
         "red": {},
@@ -99,10 +62,11 @@ def main():
                 _last, player.outputs = players[player.name](last[player.name], info)
                 last[player.name] = _last
 
-
             if i % 2 == 0:
                 frames.append(plot_current_frame(ref, i))
 
+            if i >= 1 and ref.game_end():
+                break
             # if i > 30:
             #     break
             ref.gameTurn(i)
