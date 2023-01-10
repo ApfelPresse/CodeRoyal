@@ -51,7 +51,7 @@ def plot_current_frame(ref, frame=0):
                 plt.Circle((creep.location.x, creep.location.y), 10, color=player.name, alpha=0.9, zorder=6))
 
     for obstacle in ref.obstacles:
-        width = 120
+        width = obstacle.radius * 1.5
         x = obstacle.location.x
         y = obstacle.location.y
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=2)
@@ -98,6 +98,6 @@ def plot_current_frame(ref, frame=0):
 
 
 def convert_to_gif(name: str, frames: list):
-    file_name = f'./{name}.gif'
+    file_name = f'./gifs/{name}.gif'
     imageio.mimsave(file_name, frames, fps=3)
     print(file_name)

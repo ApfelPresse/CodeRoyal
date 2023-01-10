@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from boss import handle_boss_3, handle_boss_2
+from boss import handle_boss_3, handle_boss_2, handle_boss_1, handle_boss_4
 from helper import plot_current_frame, convert_to_gif
 from ref import Referee
 from structures import Obstacle
@@ -14,7 +14,7 @@ def main():
     np.random.seed(seed_value)
 
     params = {
-        "leagueLevel": 3
+        "leagueLevel": 4
     }
     ref = Referee(params)
 
@@ -22,8 +22,8 @@ def main():
     tix = 20
 
     players = {
-        "red": handle_boss_3,
-        "blue": handle_boss_2,
+        "red": handle_boss_4,
+        "blue": handle_boss_4,
     }
     last = {
         "red": {},
@@ -37,7 +37,6 @@ def main():
             #     ent.extend(player.allUnits())
 
             for j, player in enumerate(ref.gameManager.activePlayers):
-
                 obs_for_player = []
                 touching_side: Obstacle = None
                 for obs in ref.obstacles:
@@ -67,9 +66,11 @@ def main():
 
             if i >= 1 and ref.game_end():
                 break
+
+            ref.gameTurn(i)
+
             # if i > 30:
             #     break
-            ref.gameTurn(i)
     finally:
         convert_to_gif("test", frames)
     # except Exception as ex:

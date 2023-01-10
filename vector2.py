@@ -80,9 +80,8 @@ class Vector2:
 
     def normalized(self):
         length = math.sqrt(self.lengthSquared())
-        # if length < 1e6: TODO WHY?
-        #     return Vector2(1, 0)
-        # else:
+        if length < 1e-6:
+            return Vector2(1, 0)
         return Vector2(self.x / length, self.y / length)
 
     def towards(self, other: Vector2, maxDistance: float):

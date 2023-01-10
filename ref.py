@@ -84,8 +84,6 @@ class Referee(AbstractReferee):
 
         fixCollisions(self.allEntities())
 
-
-
     def get_buildings_of_player(self, player) -> List[Obstacle]:
         buildings = []
         for ent in self.obstacles:
@@ -117,7 +115,7 @@ class Referee(AbstractReferee):
         struc = obs.structure
         if struc is not None and struc.owner == player.enemyPlayer:
             raise Exception("Cannot build: owned by enemy player")
-        if struc is Barracks and struc.owner == player and struc.isTraining:
+        if isinstance(struc, Barracks) and struc.owner == player and struc.isTraining:
             raise Exception("Cannot rebuild: training is in progress")
         obstaclesAttemptedToBuildUpon.append(obs)
         toks = strucType.split('-')
@@ -194,7 +192,7 @@ class Referee(AbstractReferee):
                         creep.location) >= closestObstacle.radius + creep.radius + Constants.TOUCHING_DELTA:
                     continue
                 struc = closestObstacle.structure
-                if struc is Mine and struc.owner != creep.owner:
+                if isinstance(struc, Mine) and struc.owner != creep.owner:
                     closestObstacle.structure = None
         for creep in allCreeps:
             creep.damage(1)
@@ -216,7 +214,7 @@ class Referee(AbstractReferee):
                         queen.location) >= closestObstacle.radius + queen.radius + Constants.TOUCHING_DELTA:
                     continue
                 struc = closestObstacle.structure
-                if (struc is Mine or struc is Barracks) and struc.owner != queen.owner:
+                if (isinstance(struc, Mine) or isinstance(struc, Barracks)) and struc.owner != queen.owner:
                     closestObstacle.structure = None
 
     def player_loop(self, obstaclesAttemptedToBuildUpon, scheduledBuildings):
@@ -234,7 +232,6 @@ class Referee(AbstractReferee):
             allObstacles: List[Obstacle] = []
             for obstacle in self.obstacles:
                 for obs in toks:
-                    barracks: Barracks = obstacle.structure
                     obsId = int(obs)
                     if obsId == obstacle.obstacleId:
                         # obs = self.obstacles[toks[1]]
@@ -244,33 +241,8 @@ class Referee(AbstractReferee):
                             raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not owned")
                         if obstacle.structure.isTraining:
                             raise ValueError(f"Barracks {obstacle.obstacleId} is training")
-                        buildingBarracks.append(barracks)
-                        barracks.progress = 0
-                        barracks.isTraining = True
+                        buildingBarracks.append(obstacle)
 
-                        def on_complete(ob):
-                            structure = ob.structure
-                            for iter in range(structure.creepType.count):
-                                if structure.creepType.assetName == KNIGHT.assetName:
-                                    it = KnightCreep(ob.structure.owner)
-                                elif structure.creepType.assetName == ARCHER.assetName:
-                                    it = ArcherCreep(ob.structure.owner)
-                                elif structure.creepType.assetName == GIANT.assetName:
-                                    it = GiantCreep(ob.structure.owner, self.obstacles)
-                                else:
-                                    raise ValueError()
-
-                                c = -1 if ob.structure.owner.isSecondPlayer else 1
-                                it.location = ob.location + Vector2(c * iter, c * iter)
-                                it.finalizeFrame()
-                                it.location = it.location.towards(ob.structure.owner.enemyPlayer.queenUnit.location,
-                                                                  30.0)
-                                it.finalizeFrame()
-                                # it.commitState(0.0)
-                                ob.structure.owner.activeCreeps.append(it)
-
-                        barracks.onComplete = on_complete
-                        obstacle.structure = barracks
                 allObstacles.append(obstacle)
 
             self.obstacles = allObstacles
@@ -280,10 +252,40 @@ class Referee(AbstractReferee):
             # if len(buildingBarracks() > buildingBarracks.toSet().size:
             #     raise ValueError("Training from some barracks more than once")
 
-            sumcosts = sum(map(lambda item: item.creepType.cost, buildingBarracks))
+            sumcosts = sum(map(lambda item: item.structure.creepType.cost, buildingBarracks))
             if sumcosts > player.gold:
-                print(f"WARNING: Player {player.name} - Training too many creeps ({sumcosts} total gold requested and player has {player.gold})")
+                print(
+                    f"WARNING: Player {player.name} - Training too many creeps ({sumcosts} total gold requested and player has {player.gold})")
                 continue
+
+            for obstacle in buildingBarracks:
+                barracks: Barracks = obstacle.structure
+                barracks.progress = 0
+                barracks.isTraining = True
+
+                def on_complete(ob):
+                    structure = ob.structure
+                    for iter in range(structure.creepType.count):
+                        if structure.creepType.assetName == KNIGHT.assetName:
+                            it = KnightCreep(ob.structure.owner)
+                        elif structure.creepType.assetName == ARCHER.assetName:
+                            it = ArcherCreep(ob.structure.owner)
+                        elif structure.creepType.assetName == GIANT.assetName:
+                            it = GiantCreep(ob.structure.owner, self.obstacles)
+                        else:
+                            raise ValueError()
+
+                        c = -1 if ob.structure.owner.isSecondPlayer else 1
+                        it.location = ob.location + Vector2(c * iter, c * iter)
+                        it.finalizeFrame()
+                        it.location = it.location.towards(ob.structure.owner.enemyPlayer.queenUnit.location,
+                                                          30.0)
+                        it.finalizeFrame()
+                        # it.commitState(0.0)
+                        ob.structure.owner.activeCreeps.append(it)
+
+                barracks.onComplete = on_complete
+                obstacle.structure = barracks
 
             player.gold -= sumcosts
 
