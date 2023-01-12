@@ -29,9 +29,6 @@ class Structure:
 
 
 class FieldObject:
-    """Characters.kt : FieldObject
-    """
-
     location: Vector2
     radius = int
     mass = int

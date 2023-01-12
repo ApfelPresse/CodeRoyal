@@ -14,7 +14,7 @@ def main():
     np.random.seed(seed_value)
 
     params = {
-        "leagueLevel": 4
+        "leagueLevel": 3
     }
     ref = Referee(params)
 
@@ -22,8 +22,8 @@ def main():
     tix = 20
 
     players = {
-        "red": handle_boss_4,
-        "blue": handle_boss_4,
+        "red": handle_boss_3,
+        "blue": handle_boss_3,
     }
     last = {
         "red": {},

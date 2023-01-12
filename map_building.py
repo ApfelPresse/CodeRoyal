@@ -47,13 +47,19 @@ def collisionCheck(entities: List[FieldObject], acceptableGap: float = 0.0) -> b
 
 def buildObstacles() -> List[Obstacle]:
     obstaclePairs = []
+    obstacle_id = 0
     for i in range(1, Leagues.obstacles):
         rate = sample(Constants.OBSTACLE_MINE_BASESIZE_RANGE)
         gold = sample(Constants.OBSTACLE_GOLD_RANGE)
         radius = sample(Constants.OBSTACLE_RADIUS_RANGE)
         l1 = Vector2(random.randint(0, Constants.WORLD_WIDTH), random.randint(0, Constants.WORLD_HEIGHT))
         l2 = Vector2(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT) - l1
-        obstaclePairs.append([Obstacle(rate, gold, radius, l1), Obstacle(rate, gold, radius, l2)])
+
+        o1 = Obstacle(rate, gold, radius, l1, obstacle_id=obstacle_id)
+        obstacle_id += 1
+        o2 = Obstacle(rate, gold, radius, l2, obstacle_id=obstacle_id)
+        obstacle_id += 1
+        obstaclePairs.append([o1, o2])
 
     obstacles = flatMap(obstaclePairs)
 
