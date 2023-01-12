@@ -4,8 +4,8 @@ import numpy as np
 class Constants:
     STARTING_GOLD = 100
 
-    viewportX = np.arange(0, 1920)
-    viewportY = np.arange(0, 1000)
+    viewportX = np.arange(0, 1920+1)
+    viewportY = np.arange(0, 1000+1)
 
     QUEEN_SPEED = 60
     TOWER_HP_INITIAL = 200
@@ -21,13 +21,13 @@ class Constants:
     GIANT_BUST_RATE = 80
 
     OBSTACLE_GAP = 90
-    OBSTACLE_RADIUS_RANGE = np.arange(60, 90)  # 60..90
-    OBSTACLE_GOLD_RANGE = np.arange(200, 250)  # 200..250
+    OBSTACLE_RADIUS_RANGE = np.arange(60, 90+1)  # 60..90
+    OBSTACLE_GOLD_RANGE = np.arange(200, 250+1)  # 200..250
     OBSTACLE_MINE_BASESIZE_RANGE = np.arange(1, 3)  # 1..3
     OBSTACLE_GOLD_INCREASE = 50
     OBSTACLE_GOLD_INCREASE_DISTANCE_1 = 500
     OBSTACLE_GOLD_INCREASE_DISTANCE_2 = 200
-    OBSTACLE_PAIRS = np.arange(6, 12)  # 6..12
+    OBSTACLE_PAIRS = np.arange(6, 12+1)  # 6..12
 
     KNIGHT_DAMAGE = 1
     ARCHER_DAMAGE = 2
@@ -35,7 +35,7 @@ class Constants:
 
     QUEEN_RADIUS = 30
     QUEEN_MASS = 10000
-    QUEEN_HP = np.arange(5, 20)  # 5..20
+    QUEEN_HP = np.arange(5, 20+1)  # 5..20
     QUEEN_HP_MULT = 5  # i.e. 25. .100 by 5
     QUEEN_VISION = 300
 

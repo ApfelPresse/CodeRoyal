@@ -3,6 +3,7 @@ import unittest
 
 import numpy as np
 
+from helper import plot_current_frame, convert_to_gif
 from ref import Referee
 from vector2 import Vector2
 
@@ -18,8 +19,10 @@ class Test(unittest.TestCase):
         ref = Referee(params={
             "leagueLevel": 3
         })
+        plot = False
+        frames = []
 
-        for i in range(25):
+        for i in range(23):
             print(f"Turn {i}")
             for player in ref.gameManager.activePlayers:
                 action = "WAIT"
@@ -37,7 +40,12 @@ class Test(unittest.TestCase):
 
                 player.outputs = [action, train]
 
+            if plot and i % 2 == 0:
+                frames.append(plot_current_frame(ref))
             ref.gameTurn(i)
+
+        if plot:
+            convert_to_gif("test_build_barracks_archer", frames)
 
         for player in ref.gameManager.activePlayers:
             assert len(player.activeCreeps) == 2
@@ -45,11 +53,22 @@ class Test(unittest.TestCase):
             for creep in player.activeCreeps:
                 assert creep.health < 50
 
+        ref.gameTurn(0)
+        for player in ref.gameManager.activePlayers:
+            assert len(player.activeCreeps) == 1
+
+        for _ in range(11):
+            ref.gameTurn(0)
+
+        for player in ref.gameManager.activePlayers:
+            assert len(player.activeCreeps) == 0
+
     def test_build_barracks_knight(self):
         ref = Referee(params={
             "leagueLevel": 3
         })
-        # frames = []
+        plot = False
+        frames = []
 
         for i in range(35):
             print(f"Turn {i}")
@@ -69,18 +88,22 @@ class Test(unittest.TestCase):
 
                 player.outputs = [action, train]
 
-            # frames.append(plot_current_frame(ref))
+            if plot and i % 2 == 0:
+                frames.append(plot_current_frame(ref))
             ref.gameTurn(i)
+
+        if plot:
+            convert_to_gif("test_build_barracks_knight", frames)
 
         queen = {
             "blue": {
-                "location": Vector2(73, 30),
-                "health": 44,
+                "location": Vector2(172, 34),
+                "health": 42,
                 "gold": 20
             },
             "red": {
-                "location": Vector2(1783, 970),
-                "health": 43,
+                "location": Vector2(1800, 861),
+                "health": 41,
                 "gold": 20
             }
         }
@@ -89,18 +112,18 @@ class Test(unittest.TestCase):
             assert player.queenUnit.health == queen[player.name]["health"]
             assert player.gold == queen[player.name]["gold"]
 
-        # convert_to_gif("test_move", frames)
 
     def test_build_barracks_giant_and_tower(self):
         ref = Referee(params={
-            "leagueLevel": 3
+            "leagueLevel": 2
         })
-        # frames = []
+        plot = True
+        frames = []
 
         for player in ref.gameManager.activePlayers:
             player.gold = 140
 
-        for i in range(26):
+        for i in range(40):
             print(f"Turn {i}")
             for player in ref.gameManager.activePlayers:
                 action = "WAIT"
@@ -109,22 +132,29 @@ class Test(unittest.TestCase):
                     if i <= 3:
                         action = "BUILD 2 BARRACKS-GIANT"
                     if 3 < i < 15:
-                        action = "BUILD 3 TOWER"
+                        action = "BUILD 4 TOWER"
 
                     if i == 4:
                         train += " 2"
                 else:
                     if i <= 3:
                         action = "BUILD 1 BARRACKS-GIANT"
-                    if 3 < i < 15:
-                        action = "BUILD 4 TOWER"
-                    if i == 4:
-                        train += " 1"
+                    if 3 < i < 14:
+                        action = "BUILD 3 TOWER"
+                    # if i == 4:
+                    #     train += " 1"
 
                 player.outputs = [action, train]
 
-            # frames.append(plot_current_frame(ref))
+            if plot and i % 2 == 0:
+                frames.append(plot_current_frame(ref))
             ref.gameTurn(i)
+            for player in ref.gameManager.activePlayers:
+                buildings = ref.get_buildings_of_player(player)
+                print(buildings)
+
+        if plot:
+            convert_to_gif("test_build_barracks_giant_and_tower", frames)
 
         for player in ref.gameManager.activePlayers:
             buildings = ref.get_buildings_of_player(player)
@@ -137,13 +167,12 @@ class Test(unittest.TestCase):
             buildings = ref.get_buildings_of_player(player)
             assert len(buildings) == 1
 
-        # convert_to_gif("test_move", frames)
-
     def test_build_barracks_knight_and_tower(self):
         ref = Referee(params={
             "leagueLevel": 3
         })
-        # frames = []
+        plot = True
+        frames = []
 
         for player in ref.gameManager.activePlayers:
             player.gold = 200
@@ -171,8 +200,9 @@ class Test(unittest.TestCase):
 
                 player.outputs = [action, train]
 
-            # if i % 3 == 0:
-            #     frames.append(plot_current_frame(ref))
+            if plot and i % 2 == 0:
+                frames.append(plot_current_frame(ref))
+
             ref.gameTurn(i)
 
         queen = {
@@ -183,7 +213,8 @@ class Test(unittest.TestCase):
                 "health": 62
             }
         }
+        if plot:
+            convert_to_gif("test_build_barracks_knight_and_tower", frames)
 
         for player in ref.gameManager.activePlayers:
             assert queen[player.name]["health"] == player.health
-        # convert_to_gif("test_move", frames)

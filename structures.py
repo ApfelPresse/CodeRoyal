@@ -9,7 +9,7 @@ import numpy as np
 from constants import Constants, CreepType, GIANT, KNIGHT, ARCHER
 from vector2 import Vector2
 
-nextObstacleId = 0
+# nextObstacleId = 0
 
 
 class Structure:
@@ -43,14 +43,14 @@ class Obstacle(FieldObject):
     structure: Structure
     obstacleId: int
 
-    def __init__(self, maxMineSize, initialGold, initialRadius, initialLocation):
+    def __init__(self, maxMineSize, initialGold, initialRadius, initialLocation, obstacle_id):
         super().__init__()
 
         self.structure = None
-        global nextObstacleId
-        nextObstacleId += 1
+        # global nextObstacleId
+        # nextObstacleId += 1
         self.maxMineSize = maxMineSize
-        self.obstacleId = nextObstacleId
+        self.obstacleId = obstacle_id
         self.mass = 0
         self.radius = initialRadius
         self.location = initialLocation
@@ -279,16 +279,29 @@ class GiantCreep(Creep):
             obstacles = []
         self.obstacles = obstacles  # type: Obstacle
 
+    def __str__(self):
+        return f"GiantCreep - {self.location}"
+
     def move(self, frames):
         """
         params frames - double, ?
         """
         # TODO (how/where to) get current obstacles ? - set externally?
-        opp_structures = list(filter(
-            lambda struct: struct.structure is not None
-                           and isinstance(struct.structure, Tower)
-                           and struct.structure.owner == self.owner.enemyPlayer,
-            self.obstacles))
+        opp_structures = []
+        for struct in self.obstacles:
+            if struct.structure is None:
+                continue
+            if not isinstance(struct.structure, Tower):
+                continue
+            if struct.structure.owner != self.owner.enemyPlayer:
+                continue
+            opp_structures.append(struct)
+
+        # opp_structures = list(filter(
+        #     lambda struct: struct.structure is not None
+        #                    and isinstance(struct.structure, Tower)
+        #                    and struct.structure.owner == self.owner.enemyPlayer,
+        #     self.obstacles))
 
         if len(opp_structures) == 0:
             return
@@ -324,6 +337,9 @@ class KnightCreep(Creep):
         self.lastLocation = None
         self.attacksThisTurn = False
 
+    def __str__(self):
+        return f"KnightCreep - {self.location}"
+
     def dealDamage(self):
         self.attacksThisTurn = False
         enemyQueen = self.owner.enemyPlayer.queenUnit
@@ -353,6 +369,9 @@ class ArcherCreep(Creep):
         self.lastLocation = None
         self.attacksThisTurn = False
         self.attackTarget = None
+
+    def __str__(self):
+        return f"ArcherCreep - {self.location}"
 
     def dealDamage(self):
         target = self.findTarget()

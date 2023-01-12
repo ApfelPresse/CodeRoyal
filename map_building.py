@@ -55,10 +55,12 @@ def buildObstacles() -> List[Obstacle]:
         l1 = Vector2(random.randint(0, Constants.WORLD_WIDTH), random.randint(0, Constants.WORLD_HEIGHT))
         l2 = Vector2(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT) - l1
 
-        o1 = Obstacle(rate, gold, radius, l1, obstacle_id=obstacle_id)
         obstacle_id += 1
-        o2 = Obstacle(rate, gold, radius, l2, obstacle_id=obstacle_id)
+        o1 = Obstacle(maxMineSize=rate, initialGold=gold, initialRadius=radius, initialLocation=l1, obstacle_id=obstacle_id)
+
         obstacle_id += 1
+        o2 = Obstacle(maxMineSize=rate, initialGold=gold, initialRadius=radius, initialLocation=l2, obstacle_id=obstacle_id)
+
         obstaclePairs.append([o1, o2])
 
     obstacles = flatMap(obstaclePairs)
