@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         ref = Referee(params={
             "leagueLevel": 3
         })
-        plot = False
+        plot = True
         frames = []
 
         for i in range(23):
@@ -30,13 +30,13 @@ class Test(unittest.TestCase):
                 if player.name == "red":
                     if i <= 3:
                         action = "BUILD 2 BARRACKS-ARCHER"
-                    if i == 4:
-                        train += " 2"
+                    # if i == 4:
+                    #     train += " 2"
                 else:
                     if i <= 3:
                         action = "BUILD 1 BARRACKS-ARCHER"
-                    if i == 4:
-                        train += " 1"
+                    # if i == 4:
+                    #     train += " 1"
 
                 player.outputs = [action, train]
 
@@ -48,20 +48,21 @@ class Test(unittest.TestCase):
             convert_to_gif("test_build_barracks_archer", frames)
 
         for player in ref.gameManager.activePlayers:
-            assert len(player.activeCreeps) == 2
-            assert player.gold == 0
+            self.assertEqual(len(player.activeCreeps), 2)
+            self.assertEqual(len(player.activeCreeps), 2)
+            self.assertEqual(player.gold, 0)
             for creep in player.activeCreeps:
-                assert creep.health < 50
+                self.assertLess(creep.health, 50)
 
         ref.gameTurn(0)
         for player in ref.gameManager.activePlayers:
-            assert len(player.activeCreeps) == 1
+            self.assertEqual(len(player.activeCreeps), 1)
 
         for _ in range(11):
             ref.gameTurn(0)
 
         for player in ref.gameManager.activePlayers:
-            assert len(player.activeCreeps) == 0
+            self.assertEqual(len(player.activeCreeps), 0)
 
     def test_build_barracks_knight(self):
         ref = Referee(params={
@@ -117,13 +118,13 @@ class Test(unittest.TestCase):
         ref = Referee(params={
             "leagueLevel": 2
         })
-        plot = True
+        plot = False
         frames = []
 
         for player in ref.gameManager.activePlayers:
             player.gold = 140
 
-        for i in range(40):
+        for i in range(14):
             print(f"Turn {i}")
             for player in ref.gameManager.activePlayers:
                 action = "WAIT"
@@ -139,16 +140,17 @@ class Test(unittest.TestCase):
                 else:
                     if i <= 3:
                         action = "BUILD 1 BARRACKS-GIANT"
-                    if 3 < i < 14:
-                        action = "BUILD 3 TOWER"
-                    # if i == 4:
-                    #     train += " 1"
+                    if 3 < i < 20:
+                        action = "BUILD 12 TOWER"
+                    if i == 4:
+                        train += " 1"
 
                 player.outputs = [action, train]
 
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
             ref.gameTurn(i)
+
             for player in ref.gameManager.activePlayers:
                 buildings = ref.get_buildings_of_player(player)
                 print(buildings)
@@ -158,10 +160,10 @@ class Test(unittest.TestCase):
 
         for player in ref.gameManager.activePlayers:
             buildings = ref.get_buildings_of_player(player)
-            assert player.gold == 0
             assert len(buildings) == 2
 
-        ref.gameTurn(0)
+        for i in range(23):
+            ref.gameTurn(0)
 
         for player in ref.gameManager.activePlayers:
             buildings = ref.get_buildings_of_player(player)

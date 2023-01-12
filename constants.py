@@ -4,8 +4,8 @@ import numpy as np
 class Constants:
     STARTING_GOLD = 100
 
-    viewportX = np.arange(0, 1920+1)
-    viewportY = np.arange(0, 1000+1)
+    viewportX = np.arange(0, 1920 + 1)
+    viewportY = np.arange(0, 1000 + 1)
 
     QUEEN_SPEED = 60
     TOWER_HP_INITIAL = 200
@@ -21,13 +21,13 @@ class Constants:
     GIANT_BUST_RATE = 80
 
     OBSTACLE_GAP = 90
-    OBSTACLE_RADIUS_RANGE = np.arange(60, 90+1)  # 60..90
-    OBSTACLE_GOLD_RANGE = np.arange(200, 250+1)  # 200..250
-    OBSTACLE_MINE_BASESIZE_RANGE = np.arange(1, 3)  # 1..3
+    OBSTACLE_RADIUS_RANGE = np.arange(60, 90 + 1)  # 60..90
+    OBSTACLE_GOLD_RANGE = np.arange(200, 250 + 1)  # 200..250
+    OBSTACLE_MINE_BASESIZE_RANGE = [1, 2, 3]  # np.arange(1, 5)  # 1..3
     OBSTACLE_GOLD_INCREASE = 50
     OBSTACLE_GOLD_INCREASE_DISTANCE_1 = 500
     OBSTACLE_GOLD_INCREASE_DISTANCE_2 = 200
-    OBSTACLE_PAIRS = np.arange(6, 12+1)  # 6..12
+    OBSTACLE_PAIRS = np.arange(6, 12 + 1)  # 6..12
 
     KNIGHT_DAMAGE = 1
     ARCHER_DAMAGE = 2
@@ -35,7 +35,7 @@ class Constants:
 
     QUEEN_RADIUS = 30
     QUEEN_MASS = 10000
-    QUEEN_HP = np.arange(5, 20+1)  # 5..20
+    QUEEN_HP = np.arange(5, 20 + 1)  # 5..20
     QUEEN_HP_MULT = 5  # i.e. 25. .100 by 5
     QUEEN_VISION = 300
 
@@ -84,6 +84,9 @@ class CreepType:
         self.assetName = assetName
 
 
-KNIGHT = CreepType(4, 80, 100, 0, 20, 400, 30, 5, "Unite_Fantassin", 0)
-ARCHER = CreepType(2, 100, 75, 200, 25, 900, 45, 8, "Unite_Archer", 1)
-GIANT = CreepType(1, 140, 50, 0, 40, 2000, 200, 10, "Unite_Siege", 2)
+KNIGHT = CreepType(count=4, cost=80, speed=100, range_=0, radius=20, mass=400, hp=30, buildTime=5,
+                   assetName="Unite_Fantassin", ordinal=0)
+ARCHER = CreepType(count=2, cost=100, speed=75, range_=200, radius=25, mass=900, hp=45, buildTime=8,
+                   assetName="Unite_Archer", ordinal=1)
+GIANT = CreepType(count=1, cost=140, speed=50, range_=0, radius=40, mass=2000, hp=200, buildTime=10,
+                  assetName="Unite_Siege", ordinal=2)

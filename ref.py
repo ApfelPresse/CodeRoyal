@@ -127,7 +127,8 @@ class Referee(AbstractReferee):
 
             if isinstance(struc, Mine):
                 struc.incomeRate += 1
-                if struc.incomeRate > obs.maxMineSize: struc.incomeRate = obs.maxMineSize
+                if struc.incomeRate > obs.maxMineSize:
+                    struc.incomeRate = obs.maxMineSize
             else:
                 obs.setMine(player)
         elif firstToken == "TOWER":

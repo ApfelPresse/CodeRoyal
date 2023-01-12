@@ -78,7 +78,7 @@ class Obstacle(FieldObject):
         self.updateEntities()
 
     def setMine(self, owner):
-        self.structure = Mine(self, owner, 1)
+        self.structure = Mine(obstacle=self, owner=owner, incomeRate=1)
 
     def setTower(self, owner, health):
         self.structure = Tower(self, owner, 0, health)

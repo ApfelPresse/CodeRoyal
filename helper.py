@@ -42,18 +42,22 @@ def plot_current_frame(ref, frame=0):
         width = 80
         x = player.queenUnit.location.x
         y = player.queenUnit.location.y
+
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=5)
         axin.imshow(game_json["Unite_Reine"]["image"])
         axin.axis('off')
+        ax.add_patch(
+            plt.Circle((x, y), player.queenUnit.radius, color=player.name, alpha=0.9, zorder=1))
 
         for creep in player.activeCreeps:
             ax.add_patch(
-                plt.Circle((creep.location.x, creep.location.y), 10, color=player.name, alpha=0.9, zorder=6))
+                plt.Circle((creep.location.x, creep.location.y), creep.radius, color=player.name, alpha=0.9, zorder=6))
 
     for obstacle in ref.obstacles:
         width = obstacle.radius * 1.5
         x = obstacle.location.x
         y = obstacle.location.y
+
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=2)
         axin.axis('off')
 
@@ -76,6 +80,9 @@ def plot_current_frame(ref, frame=0):
 
         if obstacle.structure is None:
             axin.imshow(game_json[f"LC_{obstacle.obstacle_tile_id}"]["image"])
+
+        ax.add_patch(
+            plt.Circle((x, y), obstacle.radius, color="b", alpha=0.9, zorder=1))
 
     player_stats = []
     for i, player in enumerate(ref.gameManager.players):
