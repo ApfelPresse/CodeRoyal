@@ -4,8 +4,11 @@ import numpy as np
 class Constants:
     STARTING_GOLD = 100
 
-    viewportX = np.arange(0, 1920 + 1)
-    viewportY = np.arange(0, 1000 + 1)
+    WORLD_WIDTH = 1920
+    WORLD_HEIGHT = 1000
+
+    viewportX = np.arange(0, WORLD_WIDTH + 1)
+    viewportY = np.arange(0, WORLD_HEIGHT + 1)
 
     QUEEN_SPEED = 60
     TOWER_HP_INITIAL = 200
@@ -23,7 +26,7 @@ class Constants:
     OBSTACLE_GAP = 90
     OBSTACLE_RADIUS_RANGE = np.arange(60, 90 + 1)  # 60..90
     OBSTACLE_GOLD_RANGE = np.arange(200, 250 + 1)  # 200..250
-    OBSTACLE_MINE_BASESIZE_RANGE = [1, 2, 3]  # np.arange(1, 5)  # 1..3
+    OBSTACLE_MINE_BASESIZE_RANGE = np.arange(1, 3+1)  # 1..3
     OBSTACLE_GOLD_INCREASE = 50
     OBSTACLE_GOLD_INCREASE_DISTANCE_1 = 500
     OBSTACLE_GOLD_INCREASE_DISTANCE_2 = 200
@@ -38,9 +41,6 @@ class Constants:
     QUEEN_HP = np.arange(5, 20 + 1)  # 5..20
     QUEEN_HP_MULT = 5  # i.e. 25. .100 by 5
     QUEEN_VISION = 300
-
-    WORLD_WIDTH = 1920
-    WORLD_HEIGHT = 1000
 
     TOUCHING_DELTA = 5
     WOOD_FIXED_INCOME = 10

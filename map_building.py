@@ -48,25 +48,25 @@ def collisionCheck(entities: List[FieldObject], acceptableGap: float = 0.0) -> b
 def buildObstacles() -> List[Obstacle]:
     obstaclePairs = []
     obstacle_id = 0
-    for i in range(1, Leagues.obstacles):
-        rate = sample(Constants.OBSTACLE_MINE_BASESIZE_RANGE)
+    for _ in range(1, Leagues.obstacles):
         gold = sample(Constants.OBSTACLE_GOLD_RANGE)
         radius = sample(Constants.OBSTACLE_RADIUS_RANGE)
         l1 = Vector2(random.randint(0, Constants.WORLD_WIDTH), random.randint(0, Constants.WORLD_HEIGHT))
         l2 = Vector2(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT) - l1
+        gold_max_mine_size = sample(Constants.OBSTACLE_MINE_BASESIZE_RANGE)
 
         obstacle_id += 1
-        o1 = Obstacle(maxMineSize=rate, initialGold=gold, initialRadius=radius, initialLocation=l1, obstacle_id=obstacle_id)
+        o1 = Obstacle(maxMineSize=gold_max_mine_size, initialGold=gold, initialRadius=radius, initialLocation=l1, obstacle_id=obstacle_id)
 
         obstacle_id += 1
-        o2 = Obstacle(maxMineSize=rate, initialGold=gold, initialRadius=radius, initialLocation=l2, obstacle_id=obstacle_id)
+        o2 = Obstacle(maxMineSize=gold_max_mine_size, initialGold=gold, initialRadius=radius, initialLocation=l2, obstacle_id=obstacle_id)
 
         obstaclePairs.append([o1, o2])
 
     obstacles = flatMap(obstaclePairs)
 
     collision_results = []
-    for i in range(1, 100):
+    for i in range(1, 100+1):
         for pair in obstaclePairs:
             o1, o2 = pair
             mid = (o1.location + Vector2(Constants.WORLD_WIDTH - o2.location.x,
@@ -79,8 +79,6 @@ def buildObstacles() -> List[Obstacle]:
 
 
 def sample(list_like):
-    """uses global <theRandom>
-    """
     return random.choice(list_like)
 
 
@@ -91,7 +89,7 @@ def buildMap() -> List[Obstacle]:
 
     mapCenter = Vector2(len(Constants.viewportX) / 2, len(Constants.viewportY) / 2)
     for o in obstacles:
-        o.location = o.location.snapToIntegers()  # TODO where is this? :D
+        o.location = o.location.snapToIntegers()
         if o.location.distanceTo(mapCenter) < Constants.OBSTACLE_GOLD_INCREASE_DISTANCE_1:
             o.maxMineSize += 1
             o.gold += Constants.OBSTACLE_GOLD_INCREASE

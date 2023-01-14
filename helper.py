@@ -47,7 +47,7 @@ def plot_current_frame(ref, frame=0):
         axin.imshow(game_json["Unite_Reine"]["image"])
         axin.axis('off')
         ax.add_patch(
-            plt.Circle((x, y), player.queenUnit.radius, color=player.name, alpha=0.9, zorder=1))
+            plt.Circle((x, y), player.queenUnit.radius, color=player.name, alpha=0.6, zorder=4))
 
         for creep in player.activeCreeps:
             ax.add_patch(

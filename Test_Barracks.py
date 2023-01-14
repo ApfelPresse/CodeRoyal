@@ -28,12 +28,12 @@ class Test(unittest.TestCase):
                 action = "WAIT"
                 train = "TRAIN"
                 if player.name == "red":
-                    if i <= 3:
+                    if i <= 10:
                         action = "BUILD 2 BARRACKS-ARCHER"
                     # if i == 4:
                     #     train += " 2"
                 else:
-                    if i <= 3:
+                    if i <= 10:
                         action = "BUILD 1 BARRACKS-ARCHER"
                     # if i == 4:
                     #     train += " 1"

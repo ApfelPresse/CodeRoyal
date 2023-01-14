@@ -182,9 +182,6 @@ class Unit(FieldObject):
     health: int
 
     def __init__(self, owner, unit_type):
-        """
-        param owner - Player
-        """
         super().__init__()
         self.unit_type = unit_type
         self.owner = owner
@@ -198,8 +195,6 @@ class Unit(FieldObject):
 
 
 class Queen(Unit):
-    """Characters.kt : Queen
-    """
 
     def __init__(self, owner):
         super().__init__(owner, -1)
@@ -213,9 +208,6 @@ class Queen(Unit):
         }
 
     def moveTowards(self, target: Vector2):
-        """
-        param target - Vector2
-        """
         self.location = self.location.towards(target, Constants.QUEEN_SPEED)
 
     def damage(self, damageAmount):
@@ -277,7 +269,7 @@ class GiantCreep(Creep):
         super().__init__(owner, GIANT)
         if obstacles is None:
             obstacles = []
-        self.obstacles = obstacles  # type: Obstacle
+        self.obstacles = obstacles
 
     def __str__(self):
         return f"GiantCreep - {self.location}"
