@@ -3,6 +3,7 @@ import unittest
 
 import numpy as np
 
+from helper import plot_current_frame, convert_to_gif
 from ref import Referee
 from vector2 import Vector2
 
@@ -18,9 +19,10 @@ class Test(unittest.TestCase):
         ref = Referee(params={
             "leagueLevel": 3
         })
+        plot = False
         frames = []
 
-        for i in range(6):
+        for i in range(12):
             print(f"Turn {i}")
             for player in ref.gameManager.activePlayers:
                 player.outputs = [
@@ -30,17 +32,21 @@ class Test(unittest.TestCase):
 
                 print(f"{player.name} - {player.queenUnit.location}")
             print("---")
-            # frames.append(plot_current_frame(ref))
+            if plot and i % 2 == 0:
+                frames.append(plot_current_frame(ref))
             ref.gameTurn(i)
 
-        # convert_to_gif("test_move", frames)
+        if plot:
+            convert_to_gif("test_simple_move", frames)
 
-        assert ref.gameManager.players[0].queenUnit.location == Vector2(500, 500)
+        self.assertEqual(Vector2(500, 500), ref.gameManager.players[0].queenUnit.location)
 
     def test_simple_collision_move(self):
         ref = Referee(params={
             "leagueLevel": 3
         })
+        plot = False
+        frames = []
 
         for i in range(25):
             print(f"Turn {i}")
@@ -52,7 +58,12 @@ class Test(unittest.TestCase):
 
                 print(f"{player.name} - {player.queenUnit.location}")
             print("---")
+            if plot and i % 2 == 0:
+                frames.append(plot_current_frame(ref))
             ref.gameTurn(i)
 
-        assert ref.gameManager.players[0].queenUnit.location == Vector2(485, 501)
-        assert ref.gameManager.players[1].queenUnit.location == Vector2(505, 500)
+        if plot:
+            convert_to_gif("test_simple_collision_move", frames)
+
+        self.assertEqual(Vector2(475, 496), ref.gameManager.players[0].queenUnit.location)
+        self.assertEqual(Vector2(505, 501), ref.gameManager.players[1].queenUnit.location)

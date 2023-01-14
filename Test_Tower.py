@@ -3,6 +3,7 @@ import unittest
 
 import numpy as np
 
+from helper import plot_current_frame, convert_to_gif
 from ref import Referee
 from structures import Tower
 
@@ -18,55 +19,59 @@ class Test(unittest.TestCase):
         ref = Referee(params={
             "leagueLevel": 3
         })
-        # frames = []
+        plot = False
+        frames = []
 
         for i in range(40):
             print(f"Turn {i}")
             for player in ref.gameManager.activePlayers:
                 if player.name == "red":
-                    action = "BUILD 5 TOWER"
+                    action = "BUILD 17 TOWER"
                     train = "TRAIN"
                 else:
-                    action = "BUILD 1 TOWER"
+                    action = "BUILD 18 TOWER"
                     train = "TRAIN"
 
                 player.outputs = [action, train]
 
-            # frames.append(plot_current_frame(ref))
+            if plot and i % 2 == 0:
+                frames.append(plot_current_frame(ref))
 
             ref.gameTurn(i)
 
         queen_health = {
-            "red": 35,
-            "blue": 80,
+            "red": 74,
+            "blue": 74,
         }
-        for player in ref.gameManager.activePlayers:
-            assert queen_health[player.name] == player.queenUnit.health
+        if plot:
+            convert_to_gif("test_tower_attacking_queen", frames)
 
-        # convert_to_gif("test_move", frames)
+        for player in ref.gameManager.activePlayers:
+            self.assertEqual(queen_health[player.name], player.queenUnit.health)
 
     def test_build_tower_once_and_wait_for_destroying(self):
         ref = Referee(params={
             "leagueLevel": 3
         })
-        # frames = []
+        plot = False
+        frames = []
 
         tower_health = {
             "red": [],
             "blue": [],
         }
 
-        for i in range(90):
+        for i in range(140):
             print(f"Turn {i}")
             for player in ref.gameManager.activePlayers:
                 action = "WAIT"
                 if player.name == "red":
                     if i <= 3:
-                        action = "BUILD 2 TOWER"
+                        action = "BUILD 8 TOWER"
                     train = "TRAIN"
                 else:
                     if i <= 3:
-                        action = "BUILD 1 TOWER"
+                        action = "BUILD 7 TOWER"
                     train = "TRAIN"
 
                 player.outputs = [action, train]
@@ -78,13 +83,16 @@ class Test(unittest.TestCase):
                         tower_health[player.name].append(struc.attackRadius)
                     else:
                         ValueError("Expected a Tower")
-            # frames.append(plot_current_frame(ref))
+            if plot and i % 2 == 0:
+                frames.append(plot_current_frame(ref))
 
             ref.gameTurn(i)
-        for player in ref.gameManager.activePlayers:
-            assert tower_health[player.name][-1] == 91
-            assert len(tower_health[player.name]) == 74
-            buildings = ref.get_buildings_of_player(player)
-            assert len(buildings) == 0
 
-        # convert_to_gif("test_move", frames)
+        if plot:
+            convert_to_gif("test_build_tower_once_and_wait_for_destroying", frames)
+
+        for player in ref.gameManager.activePlayers:
+            self.assertEqual(88, tower_health[player.name][-1])
+            self.assertEqual(124, len(tower_health[player.name]))
+            buildings = ref.get_buildings_of_player(player)
+            self.assertEqual(0, len(buildings))
