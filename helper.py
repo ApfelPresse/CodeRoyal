@@ -4,6 +4,7 @@ import imageio
 import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
+from matplotlib.pyplot import text
 
 from constants import Constants
 from structures import Tower, Mine, Barracks
@@ -58,6 +59,7 @@ def plot_current_frame(ref, frame=0):
         x = obstacle.location.x
         y = obstacle.location.y
 
+        text(x, y, obstacle.obstacleId, fontsize=15)
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=2)
         axin.axis('off')
 

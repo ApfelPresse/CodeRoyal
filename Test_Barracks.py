@@ -19,24 +19,24 @@ class Test(unittest.TestCase):
         ref = Referee(params={
             "leagueLevel": 3
         })
-        plot = True
+        plot = False
         frames = []
 
-        for i in range(23):
+        for i in range(27):
             print(f"Turn {i}")
             for player in ref.gameManager.activePlayers:
                 action = "WAIT"
                 train = "TRAIN"
                 if player.name == "red":
-                    if i <= 10:
-                        action = "BUILD 2 BARRACKS-ARCHER"
-                    # if i == 4:
-                    #     train += " 2"
+                    if i <= 2:
+                        action = "BUILD 8 BARRACKS-ARCHER"
+                    if i == 3:
+                        train += " 8"
                 else:
-                    if i <= 10:
-                        action = "BUILD 1 BARRACKS-ARCHER"
-                    # if i == 4:
-                    #     train += " 1"
+                    if i <= 2:
+                        action = "BUILD 7 BARRACKS-ARCHER"
+                    if i == 3:
+                        train += " 7"
 
                 player.outputs = [action, train]
 
@@ -54,6 +54,7 @@ class Test(unittest.TestCase):
             for creep in player.activeCreeps:
                 self.assertLess(creep.health, 50)
 
+        ref.gameTurn(0)
         ref.gameTurn(0)
         for player in ref.gameManager.activePlayers:
             self.assertEqual(len(player.activeCreeps), 1)
@@ -78,14 +79,14 @@ class Test(unittest.TestCase):
                 train = "TRAIN"
                 if player.name == "red":
                     if i <= 3:
-                        action = "BUILD 2 BARRACKS-KNIGHT"
+                        action = "BUILD 8 BARRACKS-KNIGHT"
                     if i == 4:
-                        train += " 2"
+                        train += " 8"
                 else:
                     if i <= 3:
-                        action = "BUILD 1 BARRACKS-KNIGHT"
+                        action = "BUILD 7 BARRACKS-KNIGHT"
                     if i == 4:
-                        train += " 1"
+                        train += " 7"
 
                 player.outputs = [action, train]
 
@@ -98,20 +99,20 @@ class Test(unittest.TestCase):
 
         queen = {
             "blue": {
-                "location": Vector2(172, 34),
-                "health": 42,
+                "location": Vector2(249, 82),
+                "health": 54,
                 "gold": 20
             },
             "red": {
-                "location": Vector2(1800, 861),
-                "health": 41,
+                "location": Vector2(1711, 970),
+                "health": 53,
                 "gold": 20
             }
         }
         for player in ref.gameManager.activePlayers:
-            assert player.queenUnit.location == queen[player.name]["location"]
-            assert player.queenUnit.health == queen[player.name]["health"]
-            assert player.gold == queen[player.name]["gold"]
+            self.assertEqual(queen[player.name]["location"],player.queenUnit.location)
+            self.assertEqual(queen[player.name]["health"], player.queenUnit.health)
+            self.assertEqual(queen[player.name]["gold"], player.gold)
 
     def test_build_barracks_giant_and_tower(self):
         ref = Referee(params={
@@ -130,19 +131,18 @@ class Test(unittest.TestCase):
                 train = "TRAIN"
                 if player.name == "red":
                     if i <= 3:
-                        action = "BUILD 2 BARRACKS-GIANT"
+                        action = "BUILD 8 BARRACKS-GIANT"
                     if 3 < i < 15:
-                        action = "BUILD 4 TOWER"
-
+                        action = "BUILD 13 TOWER"
                     if i == 4:
-                        train += " 2"
+                        train += " 8"
                 else:
                     if i <= 3:
-                        action = "BUILD 1 BARRACKS-GIANT"
+                        action = "BUILD 7 BARRACKS-GIANT"
                     if 3 < i < 20:
-                        action = "BUILD 12 TOWER"
+                        action = "BUILD 14 TOWER"
                     if i == 4:
-                        train += " 1"
+                        train += " 7"
 
                 player.outputs = [action, train]
 
@@ -150,29 +150,25 @@ class Test(unittest.TestCase):
                 frames.append(plot_current_frame(ref))
             ref.gameTurn(i)
 
-            for player in ref.gameManager.activePlayers:
-                buildings = ref.get_buildings_of_player(player)
-                print(buildings)
-
         if plot:
             convert_to_gif("test_build_barracks_giant_and_tower", frames)
 
         for player in ref.gameManager.activePlayers:
             buildings = ref.get_buildings_of_player(player)
-            assert len(buildings) == 2
+            self.assertEqual(2, len(buildings))
 
-        for i in range(23):
+        for i in range(28):
             ref.gameTurn(0)
 
         for player in ref.gameManager.activePlayers:
             buildings = ref.get_buildings_of_player(player)
-            assert len(buildings) == 1
+            self.assertEqual(1, len(buildings))
 
     def test_build_barracks_knight_and_tower(self):
         ref = Referee(params={
             "leagueLevel": 3
         })
-        plot = True
+        plot = False
         frames = []
 
         for player in ref.gameManager.activePlayers:
@@ -185,19 +181,18 @@ class Test(unittest.TestCase):
                 train = "TRAIN"
                 if player.name == "red":
                     if i <= 3:
-                        action = "BUILD 2 BARRACKS-KNIGHT"
+                        action = "BUILD 8 BARRACKS-KNIGHT"
                     if 3 < i < 20:
-                        action = "BUILD 6 TOWER"
-
+                        action = "BUILD 13 TOWER"
                     if i == 4 or i == 20:
-                        train += " 2"
+                        train += " 8"
                 else:
                     if i <= 3:
-                        action = "BUILD 1 BARRACKS-KNIGHT"
+                        action = "BUILD 7 BARRACKS-KNIGHT"
                     if 3 < i < 20:
-                        action = "BUILD 5 TOWER"
+                        action = "BUILD 14 TOWER"
                     if i == 4 or i == 20:
-                        train += " 1"
+                        train += " 7"
 
                 player.outputs = [action, train]
 
@@ -208,14 +203,14 @@ class Test(unittest.TestCase):
 
         queen = {
             "blue": {
-                "health": 60
+                "health": 70
             },
             "red": {
-                "health": 62
+                "health": 70
             }
         }
         if plot:
             convert_to_gif("test_build_barracks_knight_and_tower", frames)
 
         for player in ref.gameManager.activePlayers:
-            assert queen[player.name]["health"] == player.health
+            self.assertEqual(queen[player.name]["health"], player.health)
