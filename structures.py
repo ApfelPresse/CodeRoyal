@@ -9,6 +9,7 @@ import numpy as np
 from constants import Constants, CreepType, GIANT, KNIGHT, ARCHER
 from vector2 import Vector2
 
+
 # nextObstacleId = 0
 
 
@@ -427,7 +428,7 @@ class Player(AbstractPlayer):
                 "type": 0,
                 "type_name": "Mine",
                 "owner": self.fixOwner(struc.owner),
-                "income_rate": struc.incomeRate if visible else -1 # param1
+                "income_rate": struc.incomeRate if visible else -1  # param1
             }
         elif isinstance(struc, Tower):
             struc_info = {

@@ -19,6 +19,7 @@ def selection(pop, res, k=3):
             selection_ix = ix
     return pop[selection_ix]
 
+
 def crossover(p1, p2, r_cross):
     c1, c2 = p1.copy(), p2.copy()
     if rand() < r_cross:
@@ -26,6 +27,7 @@ def crossover(p1, p2, r_cross):
         c1 = np.concatenate((p1[:pt, :], p2[pt:, :]))
         c2 = np.concatenate((p2[:pt, :], p1[pt:, :]))
     return [c1, c2]
+
 
 def cross(p1, p2, r_cross):
     c1, c2 = p1.copy(), p2.copy()

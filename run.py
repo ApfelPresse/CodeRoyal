@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from boss import handle_boss_3, handle_boss_2, handle_boss_1, handle_boss_4
+from boss import handle_boss_3
 from helper import plot_current_frame, convert_to_gif
 from ref import Referee
 from structures import Obstacle

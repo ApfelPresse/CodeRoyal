@@ -6,6 +6,7 @@ import numpy as np
 
 from gen.genetic import genetic_algorithm
 
+
 class Test(unittest.TestCase):
 
     def test_irgendwas(self):
@@ -25,7 +26,7 @@ class Test(unittest.TestCase):
             "p2_possible_values": list(range(nodes)),
             "p3_possible_values": list(range(nodes)),
             "p4_possible_values": np.linspace(0, 200, num=20),
-            "p5_possible_values": list(range(env.action_space.n)), # labels
+            "p5_possible_values": list(range(env.action_space.n)),  # labels
         }
         with Pool(10) as pool:
             pool = None

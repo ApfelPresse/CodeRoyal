@@ -25,7 +25,6 @@ class Vector2:
     def distanceTo(self, other: Vector2) -> float:
         return np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
-
     def check_if_not_smaller_zero(self):
         if self.x < 0:
             self.x = 0

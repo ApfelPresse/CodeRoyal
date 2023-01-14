@@ -56,17 +56,19 @@ def buildObstacles() -> List[Obstacle]:
         gold_max_mine_size = sample(Constants.OBSTACLE_MINE_BASESIZE_RANGE)
 
         obstacle_id += 1
-        o1 = Obstacle(maxMineSize=gold_max_mine_size, initialGold=gold, initialRadius=radius, initialLocation=l1, obstacle_id=obstacle_id)
+        o1 = Obstacle(maxMineSize=gold_max_mine_size, initialGold=gold, initialRadius=radius, initialLocation=l1,
+                      obstacle_id=obstacle_id)
 
         obstacle_id += 1
-        o2 = Obstacle(maxMineSize=gold_max_mine_size, initialGold=gold, initialRadius=radius, initialLocation=l2, obstacle_id=obstacle_id)
+        o2 = Obstacle(maxMineSize=gold_max_mine_size, initialGold=gold, initialRadius=radius, initialLocation=l2,
+                      obstacle_id=obstacle_id)
 
         obstaclePairs.append([o1, o2])
 
     obstacles = flatMap(obstaclePairs)
 
     collision_results = []
-    for i in range(1, 100+1):
+    for i in range(1, 100 + 1):
         for pair in obstaclePairs:
             o1, o2 = pair
             mid = (o1.location + Vector2(Constants.WORLD_WIDTH - o2.location.x,

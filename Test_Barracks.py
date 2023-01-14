@@ -113,7 +113,6 @@ class Test(unittest.TestCase):
             assert player.queenUnit.health == queen[player.name]["health"]
             assert player.gold == queen[player.name]["gold"]
 
-
     def test_build_barracks_giant_and_tower(self):
         ref = Referee(params={
             "leagueLevel": 2
