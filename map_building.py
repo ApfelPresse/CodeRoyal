@@ -2,7 +2,7 @@ import random
 from functools import reduce
 from typing import List
 
-from constants import Leagues, Constants
+from constants import Constants
 from structures import Obstacle, FieldObject
 from vector2 import Vector2
 
@@ -45,10 +45,10 @@ def collisionCheck(entities: List[FieldObject], acceptableGap: float = 0.0) -> b
     return False
 
 
-def buildObstacles() -> List[Obstacle]:
+def buildObstacles(obstacles: int) -> List[Obstacle]:
     obstaclePairs = []
     obstacle_id = 0
-    for _ in range(1, Leagues.obstacles):
+    for _ in range(1, obstacles):
         gold = sample(Constants.OBSTACLE_GOLD_RANGE)
         radius = sample(Constants.OBSTACLE_RADIUS_RANGE)
         l1 = Vector2(random.randint(0, Constants.WORLD_WIDTH), random.randint(0, Constants.WORLD_HEIGHT))
@@ -84,10 +84,10 @@ def sample(list_like):
     return random.choice(list_like)
 
 
-def buildMap() -> List[Obstacle]:
+def buildMap(obstacles_count: int) -> List[Obstacle]:
     obstacles = None
     while obstacles is None:
-        obstacles = buildObstacles()
+        obstacles = buildObstacles(obstacles=obstacles_count)
 
     mapCenter = Vector2(len(Constants.viewportX) / 2, len(Constants.viewportY) / 2)
     for o in obstacles:

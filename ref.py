@@ -1,6 +1,6 @@
 from typing import List
 
-from constants import Leagues, Constants, KNIGHT, ARCHER, GIANT
+from constants import Constants, KNIGHT, ARCHER, GIANT
 from map_building import buildMap, fixCollisions, flatMap, sample
 from structures import Obstacle, Barracks, Mine, Tower, Queen, GiantCreep, KnightCreep, ArcherCreep, Player, Unit
 from vector2 import Vector2
@@ -10,10 +10,12 @@ class GameManager:
     maxTurns: int = 200
     leagueLevel: int
     solo: bool
-    players: List[Player] = []
-    activePlayers: List[Player] = []
+    players: List[Player]
+    activePlayers: List[Player]
 
     def __init__(self, leagueLevel=1, solo=False):
+        self.players = []
+        self.activePlayers = []
         self.players.append(Player("blue"))
 
         self.solo = solo
@@ -44,23 +46,38 @@ class Referee(AbstractReferee):
         self.end_game = False
         self.turn = 0
 
+
         if "leagueLevel" in params:
             self.gameManager.leagueLevel = params["leagueLevel"]
 
         if self.gameManager.leagueLevel == 1:
-            Leagues.mines = False
-            Leagues.fixedIncome = Constants.WOOD_FIXED_INCOME
-            Leagues.towers = False
-            Leagues.giants = False
-            Leagues.obstacles = sample(Constants.OBSTACLE_PAIRS)
+            self.towers = False
+            self.giants = False
+            self.mines = False
+            self.fixedIncome = Constants.WOOD_FIXED_INCOME
+            self.obstacles_count = sample(Constants.OBSTACLE_PAIRS)
+            self.queenHp = 100
         elif self.gameManager.leagueLevel == 2:
-            Leagues.mines = False
-            Leagues.fixedIncome = Constants.WOOD_FIXED_INCOME
-            Leagues.obstacles = sample(Constants.OBSTACLE_PAIRS)
+            self.towers = True
+            self.giants = True
+            self.mines = False
+            self.fixedIncome = Constants.WOOD_FIXED_INCOME
+            self.obstacles_count = sample(Constants.OBSTACLE_PAIRS)
+            self.queenHp = 100
         elif self.gameManager.leagueLevel == 3:
-            pass
+            self.towers = True
+            self.giants = True
+            self.mines = True
+            self.fixedIncome = 0
+            self.obstacles_count = Constants.OBSTACLE_PAIRS[-1]
+            self.queenHp = 100
         else:
-            Leagues.queenHp = sample(Constants.QUEEN_HP) * Constants.QUEEN_HP_MULT
+            self.towers = True
+            self.giants = True
+            self.mines = True
+            self.fixedIncome = 0
+            self.obstacles_count = Constants.OBSTACLE_PAIRS[-1]
+            self.queenHp = sample(Constants.QUEEN_HP) * Constants.QUEEN_HP_MULT
 
         self.gameManager.frameDuration = 750  # another magic number, can also be ignored, i guess.
 
@@ -69,9 +86,9 @@ class Referee(AbstractReferee):
             self.gameManager.players[1].enemyPlayer = self.gameManager.players[0]
             self.gameManager.players[1].isSecondPlayer = True
         for p in self.gameManager.players:
-            p.health = Leagues.queenHp
+            p.health = self.queenHp
 
-        self.obstacles = buildMap()
+        self.obstacles = buildMap(self.obstacles_count)
 
         for activePlayer, invert in zip(self.gameManager.activePlayers, [False, True]):
             spawnDistance = 200  # Magic number
@@ -122,7 +139,7 @@ class Referee(AbstractReferee):
         firstToken = toks.pop(0)
 
         if firstToken == "MINE":
-            if not Leagues.mines:
+            if not self.mines:
                 raise ValueError("MINE NOT ACTIVATED")
 
             if isinstance(struc, Mine):
@@ -132,7 +149,7 @@ class Referee(AbstractReferee):
             else:
                 obs.setMine(player)
         elif firstToken == "TOWER":
-            if not Leagues.towers:
+            if not self.towers:
                 raise ValueError("TOWERS NOT ACTIVATED")
 
             if isinstance(struc, Tower):
@@ -351,8 +368,8 @@ class Referee(AbstractReferee):
             it.act()
 
         for it in self.gameManager.activePlayers:
-            it.goldPerTurn = Leagues.fixedIncome
-            it.gold += Leagues.fixedIncome
+            it.goldPerTurn = self.fixedIncome
+            it.gold += self.fixedIncome
 
         for player in self.gameManager.activePlayers:
             for it in player.activeCreeps:

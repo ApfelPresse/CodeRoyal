@@ -165,6 +165,8 @@ class Test(unittest.TestCase):
             self.assertEqual(1, len(buildings))
 
     def test_build_barracks_knight_and_tower(self):
+        from ref import Referee
+
         ref = Referee(params={
             "leagueLevel": 3
         })

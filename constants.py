@@ -1,6 +1,9 @@
+from typing import final
+
 import numpy as np
 
 
+@final
 class Constants:
     STARTING_GOLD = 100
 
@@ -44,16 +47,6 @@ class Constants:
 
     TOUCHING_DELTA = 5
     WOOD_FIXED_INCOME = 10
-
-
-class Leagues:
-    towers: bool = True
-    giants: bool = True
-    mines: bool = True
-    fixedIncome: int = 0
-    obstacles: np.array = Constants.OBSTACLE_PAIRS[-1]
-    queenHp: int = 100
-
 
 class CreepType:
     ordinal: int
