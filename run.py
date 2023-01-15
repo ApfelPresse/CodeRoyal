@@ -41,12 +41,12 @@ def main():
                 for obs in ref.obstacles:
                     if player.queenUnit.is_in_range_of(obs):
                         touching_side = obs
-                    obs_for_player.append(player.printObstaclePerTurn(obs))
+                    obs_for_player.append(player.print_obstacle_per_turn(obs))
 
                 units = list(map(lambda item: {
                     "x": item.location.x,
                     "y": item.location.y,
-                    "owner": player.fixOwner(item.owner),
+                    "owner": player.fix_owner(item.owner),
                     "type": item.unit_type,
                     "health": item.health,
                 }, ref.all_units()))

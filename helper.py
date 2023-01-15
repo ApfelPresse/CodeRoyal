@@ -67,7 +67,7 @@ def plot_current_frame(ref, frame=0):
             tower = game_json[f"T{obstacle.structure.owner.name[0].upper()}{tower_idx:02d}"]["image"]
             axin.imshow(tower)
             ax.add_patch(
-                plt.Circle((x, y), obstacle.structure.attackRadius, color=obstacle.structure.owner.name, alpha=0.1,
+                plt.Circle((x, y), obstacle.structure.attack_radius, color=obstacle.structure.owner.name, alpha=0.1,
                            zorder=100))
 
         if isinstance(obstacle.structure, Mine):

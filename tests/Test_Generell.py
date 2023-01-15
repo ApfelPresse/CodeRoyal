@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from ref import Referee, buildMap
+from original.ref import Referee
 
 
 class Test(unittest.TestCase):

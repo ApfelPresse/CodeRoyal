@@ -78,7 +78,7 @@ class Test(unittest.TestCase):
                 for tower in buildings:
                     struc = tower.structure
                     if isinstance(struc, Tower):
-                        tower_health[player.name].append(struc.attackRadius)
+                        tower_health[player.name].append(struc.attack_radius)
                     else:
                         ValueError("Expected a Tower")
             if plot and i % 2 == 0:
