@@ -65,7 +65,6 @@ def plot_current_frame(ref, frame=0):
         width = obstacle.radius * 1.5
         x = obstacle.location.x
         y = obstacle.location.y
-
         text(x, y, obstacle.obstacle_id, fontsize=15)
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=2)
         axin.axis('off')
@@ -79,6 +78,7 @@ def plot_current_frame(ref, frame=0):
                            zorder=100))
 
         if isinstance(obstacle.structure, Mine):
+            text(x, y, f"{obstacle.obstacle_id} +{obstacle.structure.income_rate}/{obstacle.max_mine_size}", fontsize=15)
             axin.imshow(game_json["Mine"]["image"])
 
         if isinstance(obstacle.structure, Barracks):

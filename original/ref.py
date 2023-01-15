@@ -138,10 +138,8 @@ class Referee:
 
             if isinstance(struc, Mine):
                 struc.income_rate += 1
-                print("Upgrade Mine")
                 if struc.income_rate > obs.max_mine_size:
                     struc.income_rate = obs.max_mine_size
-                    print(f"Mine is max {struc.income_rate}")
             else:
                 obs.set_mine(player)
         elif first_token == "TOWER":
@@ -167,7 +165,6 @@ class Referee:
             obs.set_barracks(player, creep_type)
         else:
             raise ValueError(f"Invalid structure type: {first_token}")
-
 
         scheduled_buildings.append(player)
 
@@ -619,7 +616,7 @@ class Unit(FieldObject):
     unit_type: int
     owner: Player
     location: Vector2
-    maxHealth: int
+    max_health: int
     health: int
 
     def __init__(self, owner, unit_type):
@@ -627,7 +624,7 @@ class Unit(FieldObject):
         self.unit_type = unit_type
         self.owner = owner
         self.location = Vector2()
-        self.maxHealth = 0
+        self.max_health = 0
         self.health = 0
 
     @abstractmethod
@@ -641,7 +638,7 @@ class Queen(Unit):
         super().__init__(owner, -1)
         self.mass = Constants.QUEEN_MASS
         self.radius = Constants.QUEEN_RADIUS
-        self.maxHealth = Constants.QUEEN_HP
+        self.max_health = Constants.QUEEN_HP
 
     def move_towards(self, target: Vector2):
         self.location = self.location.towards(target, Constants.QUEEN_SPEED)
@@ -804,7 +801,7 @@ class Player:
 
     def __init__(self, name):
         self.is_second_player = None
-        self.queenUnit = None
+        self.queen_unit = None
         self.enemy_player = None
         self.active_creeps = []
         self.name = name

@@ -15,7 +15,7 @@ def handle_boss_4(last, game_info):
     income = 0
     for obs in game_info["obstacles"]:
         if obs["type"] == 0 and obs["owner"] == 0:
-            income += 1
+            income += obs["income_rate"]
 
     queen = ()
     for unit in game_info["units"]:
@@ -72,7 +72,7 @@ def handle_boss_3(last, game_info):
     income = 0
     for obs in game_info["obstacles"]:
         if obs["type"] == 0 and obs["owner"] == 0:
-            income += 1
+            income += obs["income_rate"]
 
     queen = ()
     for unit in game_info["units"]:

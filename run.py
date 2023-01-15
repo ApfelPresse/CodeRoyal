@@ -4,8 +4,8 @@ from typing import Optional
 import numpy as np
 
 from boss import handle_boss_3
-from sprites.sprites import plot_current_frame, convert_to_gif
 from original.ref import Referee, Obstacle
+from sprites.sprites import plot_current_frame, convert_to_gif
 
 
 def main():
@@ -55,7 +55,6 @@ def main():
                 }
 
                 _last, player.outputs = players[player.name](last[player.name], info)
-                print(player.outputs)
                 last[player.name] = _last
 
             if i % 2 == 0:
