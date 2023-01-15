@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
                     "TRAIN",
                 ]
 
-                print(f"{player.name} - {player.queenUnit.location}")
+                print(f"{player.name} - {player.queen_unit.location}")
             print("---")
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_simple_move", frames)
 
-        self.assertEqual(Vector2(500, 500), ref.gameManager.players[0].queenUnit.location)
+        self.assertEqual(Vector2(500, 500), ref.gameManager.players[0].queen_unit.location)
 
     def test_simple_collision_move(self):
         ref = Referee(params={
@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
                     "TRAIN",
                 ]
 
-                print(f"{player.name} - {player.queenUnit.location}")
+                print(f"{player.name} - {player.queen_unit.location}")
             print("---")
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
@@ -63,5 +63,5 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_simple_collision_move", frames)
 
-        self.assertEqual(Vector2(475, 496), ref.gameManager.players[0].queenUnit.location)
-        self.assertEqual(Vector2(505, 501), ref.gameManager.players[1].queenUnit.location)
+        self.assertEqual(Vector2(475, 496), ref.gameManager.players[0].queen_unit.location)
+        self.assertEqual(Vector2(505, 501), ref.gameManager.players[1].queen_unit.location)

@@ -40,16 +40,16 @@ def plot_current_frame(ref, frame=0):
 
     for i, player in enumerate(ref.gameManager.players):
         width = 80
-        x = player.queenUnit.location.x
-        y = player.queenUnit.location.y
+        x = player.queen_unit.location.x
+        y = player.queen_unit.location.y
 
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=5)
         axin.imshow(game_json["Unite_Reine"]["image"])
         axin.axis('off')
         ax.add_patch(
-            plt.Circle((x, y), player.queenUnit.radius, color=player.name, alpha=0.6, zorder=4))
+            plt.Circle((x, y), player.queen_unit.radius, color=player.name, alpha=0.6, zorder=4))
 
-        for creep in player.activeCreeps:
+        for creep in player.active_creeps:
             ax.add_patch(
                 plt.Circle((creep.location.x, creep.location.y), creep.radius, color=player.name, alpha=0.9, zorder=6))
 
@@ -58,7 +58,7 @@ def plot_current_frame(ref, frame=0):
         x = obstacle.location.x
         y = obstacle.location.y
 
-        text(x, y, obstacle.obstacleId, fontsize=15)
+        text(x, y, obstacle.obstacle_id, fontsize=15)
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=2)
         axin.axis('off')
 
@@ -90,7 +90,7 @@ def plot_current_frame(ref, frame=0):
         player_stats.append([])
         player_stats[i].append(f"Player {i}")
         player_stats[i].append(player.gold)
-        player_stats[i].append(player.queenUnit.health)
+        player_stats[i].append(player.queen_unit.health)
 
     player_stats_zip = list(map(lambda items: "-".join(map(str, items)), zip(*player_stats)))
 

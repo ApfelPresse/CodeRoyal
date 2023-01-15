@@ -39,7 +39,7 @@ def main():
                 obs_for_player = []
                 touching_side: Obstacle = None
                 for obs in ref.obstacles:
-                    if player.queenUnit.is_in_range_of(obs):
+                    if player.queen_unit.is_in_range_of(obs):
                         touching_side = obs
                     obs_for_player.append(player.print_obstacle_per_turn(obs))
 

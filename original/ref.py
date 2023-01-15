@@ -98,8 +98,8 @@ class Referee(AbstractReferee):
                 corner = Vector2(Constants.WORLD_WIDTH - spawn_distance, Constants.WORLD_HEIGHT - spawn_distance)
             else:
                 corner = Vector2(spawn_distance, spawn_distance)
-            activePlayer.queenUnit = Queen(activePlayer)
-            activePlayer.queenUnit.location = corner
+            activePlayer.queen_unit = Queen(activePlayer)
+            activePlayer.queen_unit.location = corner
 
         fix_collisions(self.all_entities())
 
@@ -112,7 +112,7 @@ class Referee(AbstractReferee):
 
     def game_end(self):
         for player in self.gameManager.players:
-            if player.queenUnit.health <= 0:
+            if player.queen_unit.health <= 0:
                 return True
         return False
 
@@ -146,8 +146,8 @@ class Referee(AbstractReferee):
 
             if isinstance(struc, Mine):
                 struc.income_rate += 1
-                if struc.income_rate > obs.maxMineSize:
-                    struc.income_rate = obs.maxMineSize
+                if struc.income_rate > obs.max_mine_size:
+                    struc.income_rate = obs.max_mine_size
             else:
                 obs.set_mine(player)
         elif first_token == "TOWER":
@@ -191,7 +191,7 @@ class Referee(AbstractReferee):
 
     def process_creeps(self):
         # TODO Sorted
-        all_creeps = flat_map(list(map(lambda player: player.activeCreeps, self.gameManager.activePlayers)))
+        all_creeps = flat_map(list(map(lambda player: player.active_creeps, self.gameManager.activePlayers)))
         for _ in range(5):
             for creep in all_creeps:
                 creep.move(1.0 / 5)
@@ -221,7 +221,7 @@ class Referee(AbstractReferee):
             creep.finalize_frame()
 
         for it in self.gameManager.activePlayers:
-            queen = it.queenUnit
+            queen = it.queen_unit
 
             dist_obstacle = None
             closest_obstacle = None
@@ -240,7 +240,7 @@ class Referee(AbstractReferee):
     def player_loop(self, obstacles_attempted_to_build_upon, scheduled_buildings):
 
         for player in self.gameManager.activePlayers:
-            queen = player.queenUnit
+            queen = player.queen_unit
 
             token = player.outputs[1].split(" ")
 
@@ -248,18 +248,18 @@ class Referee(AbstractReferee):
                 raise ValueError("Expected TRAIN on the second line")
 
             # Process building creeps
-            building_barracks: List[Barracks] = []
+            building_barracks: List[Obstacle] = []
             all_obstacles: List[Obstacle] = []
             for obstacle in self.obstacles:
                 for obs in token:
                     obs_id = int(obs)
-                    if obs_id == obstacle.obstacleId:
+                    if obs_id == obstacle.obstacle_id:
                         if not isinstance(obstacle.structure, Barracks):
-                            raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not a barracks")
+                            raise ValueError(f"Cannot spawn from {obstacle.obstacle_id}: not a barracks")
                         if obstacle.structure.owner != player:
-                            raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not owned")
+                            raise ValueError(f"Cannot spawn from {obstacle.obstacle_id}: not owned")
                         if obstacle.structure.is_training:
-                            raise ValueError(f"Barracks {obstacle.obstacleId} is training")
+                            raise ValueError(f"Barracks {obstacle.obstacle_id} is training")
                         building_barracks.append(obstacle)
 
                 all_obstacles.append(obstacle)
@@ -271,7 +271,7 @@ class Referee(AbstractReferee):
             # if len(buildingBarracks() > buildingBarracks.toSet().size:
             #     raise ValueError("Training from some barracks more than once")
 
-            sum_costs = sum(map(lambda item: item.structure.creepType.cost, building_barracks))
+            sum_costs = sum(map(lambda item: item.structure.creep_type.cost, building_barracks))
             if sum_costs > player.gold:
                 print(
                     f"WARNING: Player {player.name} - Training too many creeps ({sum_costs} total gold requested and player has {player.gold})")
@@ -284,12 +284,12 @@ class Referee(AbstractReferee):
 
                 def on_complete(ob):
                     structure = ob.structure
-                    for i in range(structure.creepType.count):
-                        if structure.creepType.asset_name == KNIGHT.asset_name:
+                    for i in range(structure.creep_type.count):
+                        if structure.creep_type.asset_name == KNIGHT.asset_name:
                             it = KnightCreep(ob.structure.owner)
-                        elif structure.creepType.asset_name == ARCHER.asset_name:
+                        elif structure.creep_type.asset_name == ARCHER.asset_name:
                             it = ArcherCreep(ob.structure.owner)
-                        elif structure.creepType.asset_name == GIANT.asset_name:
+                        elif structure.creep_type.asset_name == GIANT.asset_name:
                             it = GiantCreep(ob.structure.owner, self.obstacles)
                         else:
                             raise ValueError()
@@ -297,11 +297,11 @@ class Referee(AbstractReferee):
                         c = -1 if ob.structure.owner.is_second_player else 1
                         it.location = ob.location + Vector2(c * i, c * i)
                         it.finalize_frame()
-                        it.location = it.location.towards(ob.structure.owner.enemy_player.queenUnit.location,
+                        it.location = it.location.towards(ob.structure.owner.enemy_player.queen_unit.location,
                                                           30.0)
                         it.finalize_frame()
                         # it.commitState(0.0)
-                        ob.structure.owner.activeCreeps.append(it)
+                        ob.structure.owner.active_creeps.append(it)
 
                 barracks.on_complete = on_complete
                 obstacle.structure = barracks
@@ -331,7 +331,7 @@ class Referee(AbstractReferee):
                 #     raise ValueError(f"Site id {obsId} does not exist")
 
                 # list(filter(lambda item: item.obstacleId, self.obstacles))[0]
-                filter_obs = list(filter(lambda item: item.obstacleId == obs_id, self.obstacles))
+                filter_obs = list(filter(lambda item: item.obstacle_id == obs_id, self.obstacles))
                 if len(filter_obs) == 0 or len(filter_obs) > 1:
                     raise ValueError(f"Site id {obs_id} does not exist")
 
@@ -373,10 +373,10 @@ class Referee(AbstractReferee):
             it.gold += self.fixedIncome
 
         for player in self.gameManager.activePlayers:
-            for it in player.activeCreeps:
+            for it in player.active_creeps:
                 if it.health > 0:
                     continue
-                player.activeCreeps.remove(it)
+                player.active_creeps.remove(it)
                 # death animation
 
         for player in self.gameManager.activePlayers:
@@ -438,7 +438,7 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
 
 class Obstacle(FieldObject):
     structure: Structure
-    obstacleId: int
+    obstacle_id: int
 
     def __init__(self, max_mine_size, initial_gold, initial_radius, initial_location, obstacle_id):
         super().__init__()
@@ -446,14 +446,14 @@ class Obstacle(FieldObject):
         self.structure = None
         # global nextObstacleId
         # nextObstacleId += 1
-        self.maxMineSize = max_mine_size
-        self.obstacleId = obstacle_id
+        self.max_mine_size = max_mine_size
+        self.obstacle_id = obstacle_id
         self.mass = 0
         self.radius = initial_radius
         self.location = initial_location
         self.gold = initial_gold
         self.params = {
-            "id": self.obstacleId,
+            "id": self.obstacle_id,
             "type": "Site"
         }
         self.obstacle_tile_id = random.randint(1, 10)
@@ -477,7 +477,7 @@ class Obstacle(FieldObject):
         self.structure = Barracks(self, owner=owner, creep_type=creep_type)
 
     def __str__(self):
-        return f"{self.obstacleId} - {self.location}"
+        return f"{self.obstacle_id} - {self.location}"
 
 
 def build_obstacles(obstacles: int) -> List[Obstacle]:
@@ -528,10 +528,10 @@ def build_map(obstacles_count: int) -> List[Obstacle]:
     for o in obstacles:
         o.location = o.location.snap_to_integers()
         if o.location.distance_to(map_center) < Constants.OBSTACLE_GOLD_INCREASE_DISTANCE_1:
-            o.maxMineSize += 1
+            o.max_mine_size += 1
             o.gold += Constants.OBSTACLE_GOLD_INCREASE
         if o.location.distance_to(map_center) < Constants.OBSTACLE_GOLD_INCREASE_DISTANCE_2:
-            o.maxMineSize += 1
+            o.max_mine_size += 1
             o.gold += Constants.OBSTACLE_GOLD_INCREASE
     return obstacles
 
@@ -599,13 +599,13 @@ class Tower(Structure):
     def act(self):
         closest_enemy = None
         closest_enemy_dist = None
-        for creep in self.owner.enemy_player.activeCreeps:
+        for creep in self.owner.enemy_player.active_creeps:
             dist = self.obstacle.location.distance_to(creep.location)
             if closest_enemy_dist is None or dist < closest_enemy_dist:
                 closest_enemy_dist = dist
                 closest_enemy = creep
 
-        enemy_queen = self.owner.enemy_player.queenUnit
+        enemy_queen = self.owner.enemy_player.queen_unit
         if closest_enemy is not None and closest_enemy.location.distance_to(self.obstacle.location) < self.attack_radius:
             self.damage_creep(closest_enemy)
         elif enemy_queen.location.distance_to(self.obstacle.location) < self.attack_radius:
@@ -624,7 +624,7 @@ class Barracks(Structure):
         super().__init__(owner, obstacle)
         self.obstacle = obstacle
         self.owner = owner
-        self.creepType = creep_type
+        self.creep_type = creep_type
         self.progress_max = creep_type.build_time
         self.progress = 0
         self.is_training = False
@@ -775,14 +775,14 @@ class KnightCreep(Creep):
 
     def deal_damage(self):
         self.attacksThisTurn = False
-        enemy_queen = self.owner.enemy_player.queenUnit
+        enemy_queen = self.owner.enemy_player.queen_unit
         if self.location.distance_to(
                 enemy_queen.location) < self.radius + enemy_queen.radius + self.attack_range + Constants.TOUCHING_DELTA:
             self.attacksThisTurn = True
             self.owner.enemy_player.health -= Constants.KNIGHT_DAMAGE
 
     def move(self, frames: float):
-        enemy_queen = self.owner.enemy_player.queenUnit
+        enemy_queen = self.owner.enemy_player.queen_unit
         # move toward enemy queen, if not yet in range
         if self.location.distance_to(enemy_queen.location) > self.radius + enemy_queen.radius + self.attack_range:
             self.location = self.location.towards(
@@ -834,7 +834,7 @@ class ArcherCreep(Creep):
     def find_target(self) -> Creep:
         min_dist = None
         target = None
-        for creep in self.owner.enemy_player.activeCreeps:
+        for creep in self.owner.enemy_player.active_creeps:
             dist = creep.location.distance_to(self.location)
             if min_dist is None or dist < min_dist:
                 min_dist = dist
@@ -847,17 +847,29 @@ class AbstractPlayer:
 
 
 class Player(AbstractPlayer):
-    """Player.kt : Player
-    """
-
     # activeCreeps: List[Creep]
+    queen_unit: Queen
 
-    queenUnit: Queen
+    def __init__(self, name):
+        self.is_second_player = None
+        # self.queenUnit = None
+        self.enemy_player = None
+        self.active_creeps = []
+        self.name = name
+        self.outputs = [
+            "",
+            "",
+        ]
+
+        self.health = None
+        self.score = -2
+        self.gold = Constants.STARTING_GOLD
+        self.goldPerTurn = 0
 
     def print_obstacle_per_turn(self, obstacle: Obstacle):
         struc = obstacle.structure
         visible = (struc is not None and struc.owner.name == self.name) or obstacle.location.distance_to(
-            self.queenUnit.location) < Constants.QUEEN_VISION
+            self.queen_unit.location) < Constants.QUEEN_VISION
 
         if struc is None:
             struc_info = {
@@ -884,44 +896,28 @@ class Player(AbstractPlayer):
                 "type_name": "Tower",
                 "owner": self.fix_owner(struc.owner),
                 "until_next_train": 0 if not struc.is_training else struc.progress_max - struc.progress,
-                "creep_type": struc.creepType.ordinal
+                "creep_type": struc.creep_type.ordinal
             }
         else:
             raise ValueError("")
 
         return {**struc_info, **{
-            "id": obstacle.obstacleId,
+            "id": obstacle.obstacle_id,
             "gold": obstacle.gold if visible else -1,
             "x": obstacle.location.x,
             "y": obstacle.location.y,
             "radius": obstacle.radius,
-            "max_mine_size": obstacle.maxMineSize if visible else -1,
+            "max_mine_size": obstacle.max_mine_size if visible else -1,
         }}
-
-    def __init__(self, name):
-        self.is_second_player = None
-        self.queenUnit = None
-        self.enemy_player = None
-        self.activeCreeps = []
-        self.name = name
-        self.outputs = [
-            "",
-            "",
-        ]
-
-        self.health = None
-        self.score = -2
-        self.gold = Constants.STARTING_GOLD
-        self.goldPerTurn = 0
 
     def all_units(self):
         ent = []
-        ent.extend(self.activeCreeps)
-        ent.append(self.queenUnit)
+        ent.extend(self.active_creeps)
+        ent.append(self.queen_unit)
         return ent
 
     def check_queen_health(self):
-        self.queenUnit.health = self.health  # << really ?? double bookkeeping here.
+        self.queen_unit.health = self.health  # << really ?? double bookkeeping here.
         if self.health == 0:
             raise Exception("DEAD QUEEN")
 

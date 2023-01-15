@@ -47,22 +47,22 @@ class Test(unittest.TestCase):
             convert_to_gif("test_build_barracks_archer", frames)
 
         for player in ref.gameManager.activePlayers:
-            self.assertEqual(len(player.activeCreeps), 2)
-            self.assertEqual(len(player.activeCreeps), 2)
+            self.assertEqual(len(player.active_creeps), 2)
+            self.assertEqual(len(player.active_creeps), 2)
             self.assertEqual(player.gold, 0)
-            for creep in player.activeCreeps:
+            for creep in player.active_creeps:
                 self.assertLess(creep.health, 50)
 
         ref.game_turn(0)
         ref.game_turn(0)
         for player in ref.gameManager.activePlayers:
-            self.assertEqual(len(player.activeCreeps), 1)
+            self.assertEqual(len(player.active_creeps), 1)
 
         for _ in range(11):
             ref.game_turn(0)
 
         for player in ref.gameManager.activePlayers:
-            self.assertEqual(len(player.activeCreeps), 0)
+            self.assertEqual(len(player.active_creeps), 0)
 
     def test_build_barracks_knight(self):
         ref = Referee(params={
@@ -109,8 +109,8 @@ class Test(unittest.TestCase):
             }
         }
         for player in ref.gameManager.activePlayers:
-            self.assertEqual(queen[player.name]["location"],player.queenUnit.location)
-            self.assertEqual(queen[player.name]["health"], player.queenUnit.health)
+            self.assertEqual(queen[player.name]["location"], player.queen_unit.location)
+            self.assertEqual(queen[player.name]["health"], player.queen_unit.health)
             self.assertEqual(queen[player.name]["gold"], player.gold)
 
     def test_build_barracks_giant_and_tower(self):

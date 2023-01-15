@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
             convert_to_gif("test_tower_attacking_queen", frames)
 
         for player in ref.gameManager.activePlayers:
-            self.assertEqual(queen_health[player.name], player.queenUnit.health)
+            self.assertEqual(queen_health[player.name], player.queen_unit.health)
 
     def test_build_tower_once_and_wait_for_destroying(self):
         ref = Referee(params={

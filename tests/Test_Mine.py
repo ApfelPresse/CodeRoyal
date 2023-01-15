@@ -118,8 +118,8 @@ class Test(unittest.TestCase):
             self.assertEqual(0, len(ref.get_buildings_of_player(player)))
 
         for obs in ref.obstacles:
-            if obs.obstacleId == 8:
+            if obs.obstacle_id == 8:
                 self.assertEqual(0, obs.gold)
-            if obs.obstacleId == 7:
+            if obs.obstacle_id == 7:
                 self.assertEqual(0, obs.gold)
 
