@@ -3,3 +3,6 @@ kt/
 /**/*.gif
 /**/*.java
 /sprites/tmp/
+/optimized/build/
+/optimized/ref.c
+/optimized/ref.html

@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     ext_modules=cythonize(
         [
-            'ref.py'
+            'ref.pyx'
         ],
         compiler_directives={
             'language_level': "3",

@@ -4,10 +4,12 @@ from typing import Optional
 import numpy as np
 
 from boss import handle_boss_3
-from original.ref import Referee, Obstacle
 from sprites.sprites import plot_current_frame, convert_to_gif
+from optimized.ref import Referee, Obstacle
+from util import timeit
 
 
+@timeit
 def main():
     seed_value = 6
     random.seed(seed_value)
@@ -18,6 +20,7 @@ def main():
     }
     ref = Referee(params)
 
+    plot = False
     frames = []
 
     players = {
@@ -57,20 +60,16 @@ def main():
                 _last, player.outputs = players[player.name](last[player.name], info)
                 last[player.name] = _last
 
-            if i % 2 == 0:
+            if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref, i))
 
             if i >= 1 and ref.game_end():
                 break
 
             ref.game_turn(i)
-
-            # if i > 30:
-            #     break
     finally:
-        convert_to_gif("test", frames)
-    # except Exception as ex:
-    #     print(ex)
+        if plot:
+            convert_to_gif("test", frames)
 
 
 if __name__ == '__main__':
