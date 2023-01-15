@@ -4,8 +4,7 @@ import numpy as np
 
 from boss import handle_boss_3
 from helper import plot_current_frame, convert_to_gif
-from ref import Referee
-from structures import Obstacle
+from ref import Referee, Obstacle
 
 
 def main():

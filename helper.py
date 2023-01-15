@@ -6,8 +6,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import text
 
-from constants import Constants
-from structures import Tower, Mine, Barracks
+from ref import Mine, Tower, Barracks, Constants
 
 
 def plot_current_frame(ref, frame=0):

@@ -4,8 +4,7 @@ import unittest
 import numpy as np
 
 from helper import plot_current_frame, convert_to_gif
-from ref import Referee
-from vector2 import Vector2
+from ref import Referee, Vector2
 
 
 class Test(unittest.TestCase):

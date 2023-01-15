@@ -4,8 +4,7 @@ import unittest
 import numpy as np
 
 from helper import plot_current_frame, convert_to_gif
-from ref import Referee
-from structures import Tower
+from ref import Referee, Tower
 
 
 class Test(unittest.TestCase):

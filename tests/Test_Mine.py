@@ -3,8 +3,7 @@ import unittest
 
 import numpy as np
 
-from ref import Referee
-from structures import Mine
+from ref import Referee, Mine
 
 
 class Test(unittest.TestCase):
