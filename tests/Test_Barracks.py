@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from helper import plot_current_frame, convert_to_gif
-from ref import Referee, Vector2
+from original.ref import Referee, Vector2
 
 
 class Test(unittest.TestCase):
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
 
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
         if plot:
             convert_to_gif("test_build_barracks_archer", frames)
@@ -53,13 +53,13 @@ class Test(unittest.TestCase):
             for creep in player.activeCreeps:
                 self.assertLess(creep.health, 50)
 
-        ref.gameTurn(0)
-        ref.gameTurn(0)
+        ref.game_turn(0)
+        ref.game_turn(0)
         for player in ref.gameManager.activePlayers:
             self.assertEqual(len(player.activeCreeps), 1)
 
         for _ in range(11):
-            ref.gameTurn(0)
+            ref.game_turn(0)
 
         for player in ref.gameManager.activePlayers:
             self.assertEqual(len(player.activeCreeps), 0)
@@ -91,7 +91,7 @@ class Test(unittest.TestCase):
 
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
         if plot:
             convert_to_gif("test_build_barracks_knight", frames)
@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
 
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
         if plot:
             convert_to_gif("test_build_barracks_giant_and_tower", frames)
@@ -157,15 +157,13 @@ class Test(unittest.TestCase):
             self.assertEqual(2, len(buildings))
 
         for i in range(28):
-            ref.gameTurn(0)
+            ref.game_turn(0)
 
         for player in ref.gameManager.activePlayers:
             buildings = ref.get_buildings_of_player(player)
             self.assertEqual(1, len(buildings))
 
     def test_build_barracks_knight_and_tower(self):
-        from ref import Referee
-
         ref = Referee(params={
             "leagueLevel": 3
         })
@@ -200,7 +198,7 @@ class Test(unittest.TestCase):
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
 
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
         queen = {
             "blue": {

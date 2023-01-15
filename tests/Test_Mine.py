@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
                     train = "TRAIN"
 
                 player.outputs = [action, train]
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
             for player in ref.gameManager.activePlayers:
                 buildings = ref.get_buildings_of_player(player)
@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
                     struc = buildings[0].structure
                     if isinstance(struc, Mine):
                         mine = struc
-                        income[player.name] += mine.incomeRate
+                        income[player.name] += mine.income_rate
                     else:
                         ValueError("This should be a Mine")
 
@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
                     train = "TRAIN"
 
                 player.outputs = [action, train]
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
             for player in ref.gameManager.activePlayers:
                 buildings = ref.get_buildings_of_player(player)
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
                     struc = buildings[0].structure
                     if isinstance(struc, Mine):
                         mine = struc
-                        income[player.name] += mine.incomeRate
+                        income[player.name] += mine.income_rate
                     else:
                         ValueError("This should be a Mine")
 
@@ -108,7 +108,7 @@ class Test(unittest.TestCase):
                     train = "TRAIN"
 
                 player.outputs = [action, train]
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
             for player in ref.gameManager.activePlayers:
                 if len(ref.get_buildings_of_player(player)) == 0:

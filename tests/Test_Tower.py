@@ -4,8 +4,7 @@ import unittest
 import numpy as np
 
 from helper import plot_current_frame, convert_to_gif
-from ref import Referee, Tower
-
+from original.ref import Referee, Tower
 
 class Test(unittest.TestCase):
 
@@ -36,7 +35,7 @@ class Test(unittest.TestCase):
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
 
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
         queen_health = {
             "red": 74,
@@ -85,7 +84,7 @@ class Test(unittest.TestCase):
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
 
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
         if plot:
             convert_to_gif("test_build_tower_once_and_wait_for_destroying", frames)

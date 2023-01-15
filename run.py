@@ -66,7 +66,7 @@ def main():
             if i >= 1 and ref.game_end():
                 break
 
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
             # if i > 30:
             #     break

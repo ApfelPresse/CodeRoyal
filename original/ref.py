@@ -16,7 +16,7 @@ class GameManager:
     players: List[Player]
     activePlayers: List[Player]
 
-    def __init__(self, leagueLevel=1, solo=False):
+    def __init__(self, league_level=1, solo=False):
         self.players = []
         self.activePlayers = []
         self.players.append(Player("blue"))
@@ -26,7 +26,7 @@ class GameManager:
             self.players.append(Player("red"))
 
         self.activePlayers = self.players
-        self.leagueLevel = leagueLevel
+        self.leagueLevel = league_level
 
 
 class AbstractReferee:  # TODO find, fill or ignore
@@ -84,24 +84,24 @@ class Referee(AbstractReferee):
         self.gameManager.frameDuration = 750  # another magic number, can also be ignored, i guess.
 
         if not self.gameManager.solo:
-            self.gameManager.players[0].enemyPlayer = self.gameManager.players[1]
-            self.gameManager.players[1].enemyPlayer = self.gameManager.players[0]
-            self.gameManager.players[1].isSecondPlayer = True
+            self.gameManager.players[0].enemy_player = self.gameManager.players[1]
+            self.gameManager.players[1].enemy_player = self.gameManager.players[0]
+            self.gameManager.players[1].is_second_player = True
         for p in self.gameManager.players:
             p.health = self.queenHp
 
-        self.obstacles = buildMap(self.obstacles_count)
+        self.obstacles = build_map(self.obstacles_count)
 
         for activePlayer, invert in zip(self.gameManager.activePlayers, [False, True]):
-            spawnDistance = 200  # Magic number
+            spawn_distance = 200  # Magic number
             if invert:
-                corner = Vector2(Constants.WORLD_WIDTH - spawnDistance, Constants.WORLD_HEIGHT - spawnDistance)
+                corner = Vector2(Constants.WORLD_WIDTH - spawn_distance, Constants.WORLD_HEIGHT - spawn_distance)
             else:
-                corner = Vector2(spawnDistance, spawnDistance)
+                corner = Vector2(spawn_distance, spawn_distance)
             activePlayer.queenUnit = Queen(activePlayer)
             activePlayer.queenUnit.location = corner
 
-        fixCollisions(self.allEntities())
+        fix_collisions(self.all_entities())
 
     def get_buildings_of_player(self, player) -> List[Obstacle]:
         buildings = []
@@ -122,35 +122,35 @@ class Referee(AbstractReferee):
             units.extend(player.allUnits())
         return units
 
-    def allEntities(self):
+    def all_entities(self):
         ent = []
         ent.extend(self.obstacles)
         ent.extend(self.all_units())
         return ent
         # return [u for p in self.gameManager.players for u in p.allUnits()] + self.obstacles
 
-    def scheduleBuilding(self, player: Player, obs: Obstacle, strucType: str, obstaclesAttemptedToBuildUpon: list,
-                         scheduledBuildings: list):
+    def schedule_building(self, player: Player, obs: Obstacle, struc_type: str, obstacles_attempted_to_build_upon: list,
+                          scheduled_buildings: list):
         struc = obs.structure
-        if struc is not None and struc.owner == player.enemyPlayer:
+        if struc is not None and struc.owner == player.enemy_player:
             raise Exception("Cannot build: owned by enemy player")
         if isinstance(struc, Barracks) and struc.owner == player and struc.isTraining:
             raise Exception("Cannot rebuild: training is in progress")
-        obstaclesAttemptedToBuildUpon.append(obs)
-        toks = strucType.split('-')
-        firstToken = toks.pop(0)
+        obstacles_attempted_to_build_upon.append(obs)
+        token = struc_type.split('-')
+        first_token = token.pop(0)
 
-        if firstToken == "MINE":
+        if first_token == "MINE":
             if not self.mines:
                 raise ValueError("MINE NOT ACTIVATED")
 
             if isinstance(struc, Mine):
-                struc.incomeRate += 1
-                if struc.incomeRate > obs.maxMineSize:
-                    struc.incomeRate = obs.maxMineSize
+                struc.income_rate += 1
+                if struc.income_rate > obs.maxMineSize:
+                    struc.income_rate = obs.maxMineSize
             else:
                 obs.setMine(player)
-        elif firstToken == "TOWER":
+        elif first_token == "TOWER":
             if not self.towers:
                 raise ValueError("TOWERS NOT ACTIVATED")
 
@@ -158,102 +158,102 @@ class Referee(AbstractReferee):
                 struc.health += Constants.TOWER_HP_INCREMENT
                 if struc.health > Constants.TOWER_HP_MAXIMUM: struc.health = Constants.TOWER_HP_MAXIMUM
             else:
-                obs.setTower(player, Constants.TOWER_HP_INITIAL)
+                obs.set_tower(player, Constants.TOWER_HP_INITIAL)
 
-        elif firstToken == "BARRACKS":
-            creepInputType = toks.pop(0)
-            if creepInputType == "KNIGHT":
-                creepType = KNIGHT
-            elif creepInputType == "ARCHER":
-                creepType = ARCHER
-            elif creepInputType == "GIANT":
-                creepType = GIANT
+        elif first_token == "BARRACKS":
+            creep_input_type = token.pop(0)
+            if creep_input_type == "KNIGHT":
+                creep_type = KNIGHT
+            elif creep_input_type == "ARCHER":
+                creep_type = ARCHER
+            elif creep_input_type == "GIANT":
+                creep_type = GIANT
             else:
-                raise Exception(f"CreepType {creepInputType} not found")
-            obs.setBarracks(player, creepType)
+                raise Exception(f"CreepType {creep_input_type} not found")
+            obs.set_barracks(player, creep_type)
         else:
-            raise ValueError(f"Invalid structure type: {firstToken}")
-        scheduledBuildings.append(player)
+            raise ValueError(f"Invalid structure type: {first_token}")
+        scheduled_buildings.append(player)
 
-        return obstaclesAttemptedToBuildUpon, scheduledBuildings
+        return obstacles_attempted_to_build_upon, scheduled_buildings
 
-    def processPlayerActions(self, turn):
-        obstaclesAttemptedToBuildUpon = []
-        scheduledBuildings = []
+    def process_player_actions(self, turn):
+        obstacles_attempted_to_build_upon = []
+        scheduled_buildings = []
 
-        obstaclesAttemptedToBuildUpon, scheduledBuildings = self.player_loop(obstaclesAttemptedToBuildUpon,
-                                                                             scheduledBuildings)
+        obstacles_attempted_to_build_upon, scheduled_buildings = self.player_loop(obstacles_attempted_to_build_upon,
+                                                                             scheduled_buildings)
 
         # If they're both building onto the same one, then actually build only one: depending on parity of the turn number
-        if len(obstaclesAttemptedToBuildUpon) == 2 and obstaclesAttemptedToBuildUpon[0] == \
-                obstaclesAttemptedToBuildUpon[1]:
-            del scheduledBuildings[turn % 2]
+        if len(obstacles_attempted_to_build_upon) == 2 and obstacles_attempted_to_build_upon[0] == \
+                obstacles_attempted_to_build_upon[1]:
+            del scheduled_buildings[turn % 2]
 
-    def processCreeps(self):
+    def process_creeps(self):
         # TODO Sorted
-        allCreeps = flatMap(list(map(lambda player: player.activeCreeps, self.gameManager.activePlayers)))
+        all_creeps = flat_map(list(map(lambda player: player.activeCreeps, self.gameManager.activePlayers)))
         for _ in range(5):
-            for creep in allCreeps:
+            for creep in all_creeps:
                 creep.move(1.0 / 5)
-            fixCollisions(self.allEntities(), 1)
+            fix_collisions(self.all_entities(), 1)
 
-        for creep in allCreeps:
+        for creep in all_creeps:
             creep.dealDamage()
 
-        for creep in allCreeps:
+        for creep in all_creeps:
             dist_obstacle = None
-            closestObstacle = None
+            closest_obstacle = None
             for obs in self.obstacles:
                 dist = obs.location.distanceTo(creep.location)
                 if dist_obstacle is None or dist < dist_obstacle:
                     dist_obstacle = dist
-                    closestObstacle = obs
-                if closestObstacle.location.distanceTo(
-                        creep.location) >= closestObstacle.radius + creep.radius + Constants.TOUCHING_DELTA:
+                    closest_obstacle = obs
+                if closest_obstacle.location.distanceTo(
+                        creep.location) >= closest_obstacle.radius + creep.radius + Constants.TOUCHING_DELTA:
                     continue
-                struc = closestObstacle.structure
+                struc = closest_obstacle.structure
                 if isinstance(struc, Mine) and struc.owner != creep.owner:
-                    closestObstacle.structure = None
-        for creep in allCreeps:
+                    closest_obstacle.structure = None
+        for creep in all_creeps:
             creep.damage(1)
 
-        for creep in allCreeps:
+        for creep in all_creeps:
             creep.finalizeFrame()
 
         for it in self.gameManager.activePlayers:
             queen = it.queenUnit
 
             dist_obstacle = None
-            closestObstacle = None
+            closest_obstacle = None
             for obs in self.obstacles:
                 dist = obs.location.distanceTo(queen.location)
                 if dist_obstacle is None or dist < dist_obstacle:
                     dist_obstacle = dist
-                    closestObstacle = obs
-                if closestObstacle.location.distanceTo(
-                        queen.location) >= closestObstacle.radius + queen.radius + Constants.TOUCHING_DELTA:
+                    closest_obstacle = obs
+                if closest_obstacle.location.distanceTo(
+                        queen.location) >= closest_obstacle.radius + queen.radius + Constants.TOUCHING_DELTA:
                     continue
-                struc = closestObstacle.structure
+                struc = closest_obstacle.structure
                 if (isinstance(struc, Mine) or isinstance(struc, Barracks)) and struc.owner != queen.owner:
-                    closestObstacle.structure = None
+                    closest_obstacle.structure = None
 
-    def player_loop(self, obstaclesAttemptedToBuildUpon, scheduledBuildings):
+    def player_loop(self, obstacles_attempted_to_build_upon, scheduled_buildings):
 
         for player in self.gameManager.activePlayers:
             queen = player.queenUnit
 
-            toks = player.outputs[1].split(" ")
+            token = player.outputs[1].split(" ")
 
-            if toks.pop(0) != "TRAIN":
+            if token.pop(0) != "TRAIN":
                 raise ValueError("Expected TRAIN on the second line")
 
             # Process building creeps
-            buildingBarracks: List[Barracks] = []
-            allObstacles: List[Obstacle] = []
+            building_barracks: List[Barracks] = []
+            all_obstacles: List[Obstacle] = []
             for obstacle in self.obstacles:
-                for obs in toks:
-                    obsId = int(obs)
-                    if obsId == obstacle.obstacleId:
+                for obs in token:
+                    obs_id = int(obs)
+                    if obs_id == obstacle.obstacleId:
                         # obs = self.obstacles[toks[1]]
                         if not isinstance(obstacle.structure, Barracks):
                             raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not a barracks")
@@ -261,31 +261,31 @@ class Referee(AbstractReferee):
                             raise ValueError(f"Cannot spawn from {obstacle.obstacleId}: not owned")
                         if obstacle.structure.isTraining:
                             raise ValueError(f"Barracks {obstacle.obstacleId} is training")
-                        buildingBarracks.append(obstacle)
+                        building_barracks.append(obstacle)
 
-                allObstacles.append(obstacle)
+                all_obstacles.append(obstacle)
 
-            self.obstacles = allObstacles
-            fixCollisions(self.allEntities())
+            self.obstacles = all_obstacles
+            fix_collisions(self.all_entities())
 
             # TODO remove duplicates
             # if len(buildingBarracks() > buildingBarracks.toSet().size:
             #     raise ValueError("Training from some barracks more than once")
 
-            sumcosts = sum(map(lambda item: item.structure.creepType.cost, buildingBarracks))
+            sumcosts = sum(map(lambda item: item.structure.creepType.cost, building_barracks))
             if sumcosts > player.gold:
                 print(
                     f"WARNING: Player {player.name} - Training too many creeps ({sumcosts} total gold requested and player has {player.gold})")
                 continue
 
-            for obstacle in buildingBarracks:
+            for obstacle in building_barracks:
                 barracks: Barracks = obstacle.structure
                 barracks.progress = 0
                 barracks.isTraining = True
 
                 def on_complete(ob):
                     structure = ob.structure
-                    for iter in range(structure.creepType.count):
+                    for i in range(structure.creepType.count):
                         if structure.creepType.assetName == KNIGHT.assetName:
                             it = KnightCreep(ob.structure.owner)
                         elif structure.creepType.assetName == ARCHER.assetName:
@@ -295,57 +295,57 @@ class Referee(AbstractReferee):
                         else:
                             raise ValueError()
 
-                        c = -1 if ob.structure.owner.isSecondPlayer else 1
-                        it.location = ob.location + Vector2(c * iter, c * iter)
+                        c = -1 if ob.structure.owner.is_second_player else 1
+                        it.location = ob.location + Vector2(c * i, c * i)
                         it.finalizeFrame()
-                        it.location = it.location.towards(ob.structure.owner.enemyPlayer.queenUnit.location,
+                        it.location = it.location.towards(ob.structure.owner.enemy_player.queenUnit.location,
                                                           30.0)
                         it.finalizeFrame()
                         # it.commitState(0.0)
                         ob.structure.owner.activeCreeps.append(it)
 
-                barracks.onComplete = on_complete
+                barracks.on_complete = on_complete
                 obstacle.structure = barracks
 
             player.gold -= sumcosts
 
             # Process queen command
             line = player.outputs[0].strip()
-            toks = line.split(" ")
-            command = toks.pop(0)
+            token = line.split(" ")
+            command = token.pop(0)
 
             if command == "WAIT":
                 pass
             elif command == "MOVE":
                 try:
-                    x = int(toks.pop(0))
-                    y = int(toks.pop(0))
+                    x = int(token.pop(0))
+                    y = int(token.pop(0))
                     queen.moveTowards(Vector2(x, y))
-                except Exception as ex:
+                except Exception as _:
                     raise ValueError("In MOVE command, x and y must be integers")
             elif command == "BUILD":
                 try:
-                    obsId = int(toks.pop(0))
-                except Exception as ex:
+                    obs_id = int(token.pop(0))
+                except Exception as _:
                     raise ValueError("Could not parse siteId")
                 # if obsId not in self.obstacles:
                 #     raise ValueError(f"Site id {obsId} does not exist")
 
                 # list(filter(lambda item: item.obstacleId, self.obstacles))[0]
-                obss = list(filter(lambda item: item.obstacleId == obsId, self.obstacles))
+                obss = list(filter(lambda item: item.obstacleId == obs_id, self.obstacles))
                 if len(obss) == 0 or len(obss) > 1:
-                    raise ValueError(f"Site id {obsId} does not exist")
+                    raise ValueError(f"Site id {obs_id} does not exist")
 
                 obs = obss[0]
-                strucType = toks.pop(0)
+                struc_type = token.pop(0)
 
                 # dist = obs.location.distanceTo(queen.location)
                 # if dist < queen.radius + obs.radius + Constants.TOUCHING_DELTA:
                 if queen.is_in_range_of(obs):
-                    obstaclesAttemptedToBuildUpon, scheduledBuildings = self.scheduleBuilding(player, obs,
-                                                                                              strucType,
-                                                                                              obstaclesAttemptedToBuildUpon,
-                                                                                              scheduledBuildings)
+                    obstacles_attempted_to_build_upon, scheduled_buildings = self.schedule_building(player, obs,
+                                                                                                    struc_type,
+                                                                                                    obstacles_attempted_to_build_upon,
+                                                                                                    scheduled_buildings)
                 else:
                     queen.moveTowards(obs.location)
             else:
@@ -356,15 +356,15 @@ class Referee(AbstractReferee):
             # timout exeception
             # player.kill("Timeout!")
 
-        return obstaclesAttemptedToBuildUpon, scheduledBuildings
+        return obstacles_attempted_to_build_upon, scheduled_buildings
 
-    def gameTurn(self, turn):
+    def game_turn(self, turn):
         self.turn = turn
         for it in self.gameManager.activePlayers:
             it.goldPerTurn = 0
 
-        self.processPlayerActions(turn)
-        self.processCreeps()
+        self.process_player_actions(turn)
+        self.process_creeps()
 
         for it in self.obstacles:
             it.act()
@@ -384,11 +384,11 @@ class Referee(AbstractReferee):
             player.checkQueenHealth()
             self.end_game = True
 
-        for it in self.allEntities():
+        for it in self.all_entities():
             it.location = it.location.snapToIntegers()
 
 
-def flatMap(array: List[List]):
+def flat_map(array: List[List]):
     return reduce(list.__add__, array)
 
 
@@ -403,12 +403,12 @@ class FieldObject:
         self.mass = 0  # 0 := immovable
 
 
-def collisionCheck(entities: List[FieldObject], acceptableGap: float = 0.0) -> bool:
+def collision_check(entities: List[FieldObject], acceptableGap: float = 0.0) -> bool:
     for iu1, u1 in enumerate(entities):
         rad = u1.radius
-        clampDist = Constants.OBSTACLE_GAP + rad if u1.mass == 0 else rad
-        u1.location = u1.location.clampWithin(clampDist, Constants.WORLD_WIDTH - clampDist, clampDist,
-                                              Constants.WORLD_HEIGHT - clampDist)
+        clamp_dist = Constants.OBSTACLE_GAP + rad if u1.mass == 0 else rad
+        u1.location = u1.location.clampWithin(clamp_dist, Constants.WORLD_WIDTH - clamp_dist, clamp_dist,
+                                              Constants.WORLD_HEIGHT - clamp_dist)
 
         u1.location.check_if_not_smaller_zero()
         for iu2, u2 in enumerate(entities):
@@ -441,18 +441,18 @@ class Obstacle(FieldObject):
     structure: Structure
     obstacleId: int
 
-    def __init__(self, maxMineSize, initialGold, initialRadius, initialLocation, obstacle_id):
+    def __init__(self, max_mine_size, initial_gold, initial_radius, initial_location, obstacle_id):
         super().__init__()
 
         self.structure = None
         # global nextObstacleId
         # nextObstacleId += 1
-        self.maxMineSize = maxMineSize
+        self.maxMineSize = max_mine_size
         self.obstacleId = obstacle_id
         self.mass = 0
-        self.radius = initialRadius
-        self.location = initialLocation
-        self.gold = initialGold
+        self.radius = initial_radius
+        self.location = initial_location
+        self.gold = initial_gold
         self.params = {
             "id": self.obstacleId,
             "type": "Site"
@@ -461,7 +461,7 @@ class Obstacle(FieldObject):
         self.area = np.pi * self.radius * self.radius
         # self.structure = None
 
-    def updateEntities(self):
+    def update_entities(self):
         # TODO update animation and projectile from towers
         return False
         # if self.structure is not None:
@@ -473,23 +473,23 @@ class Obstacle(FieldObject):
     def act(self):
         if self.structure is not None and self.structure.act():
             self.structure = None
-        self.updateEntities()
+        self.update_entities()
 
     def setMine(self, owner):
-        self.structure = Mine(obstacle=self, owner=owner, incomeRate=1)
+        self.structure = Mine(obstacle=self, owner=owner, income_rate=1)
 
-    def setTower(self, owner, health):
+    def set_tower(self, owner, health):
         self.structure = Tower(self, owner, 0, health)
 
-    def setBarracks(self, owner, creepType):
+    def set_barracks(self, owner, creepType):
         self.structure = Barracks(self, owner=owner, creepType=creepType)
 
     def __str__(self):
         return f"{self.obstacleId} - {self.location}"
 
 
-def buildObstacles(obstacles: int) -> List[Obstacle]:
-    obstaclePairs = []
+def build_obstacles(obstacles: int) -> List[Obstacle]:
+    obstacle_pairs = []
     obstacle_id = 0
     for _ in range(1, obstacles):
         gold = sample(Constants.OBSTACLE_GOLD_RANGE)
@@ -499,27 +499,27 @@ def buildObstacles(obstacles: int) -> List[Obstacle]:
         gold_max_mine_size = sample(Constants.OBSTACLE_MINE_BASESIZE_RANGE)
 
         obstacle_id += 1
-        o1 = Obstacle(maxMineSize=gold_max_mine_size, initialGold=gold, initialRadius=radius, initialLocation=l1,
+        o1 = Obstacle(max_mine_size=gold_max_mine_size, initial_gold=gold, initial_radius=radius, initial_location=l1,
                       obstacle_id=obstacle_id)
 
         obstacle_id += 1
-        o2 = Obstacle(maxMineSize=gold_max_mine_size, initialGold=gold, initialRadius=radius, initialLocation=l2,
+        o2 = Obstacle(max_mine_size=gold_max_mine_size, initial_gold=gold, initial_radius=radius, initial_location=l2,
                       obstacle_id=obstacle_id)
 
-        obstaclePairs.append([o1, o2])
+        obstacle_pairs.append([o1, o2])
 
-    obstacles = flatMap(obstaclePairs)
+    obstacles = flat_map(obstacle_pairs)
 
     collision_results = []
     for i in range(1, 100 + 1):
-        for pair in obstaclePairs:
+        for pair in obstacle_pairs:
             o1, o2 = pair
             mid = (o1.location + Vector2(Constants.WORLD_WIDTH - o2.location.x,
                                          Constants.WORLD_HEIGHT - o2.location.y)) / 2.0
             o1.location = mid
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
-        collision_results.append(collisionCheck(obstacles, float(Constants.OBSTACLE_GAP)))
+        collision_results.append(collision_check(obstacles, float(Constants.OBSTACLE_GAP)))
     return obstacles
 
 
@@ -527,26 +527,26 @@ def sample(list_like):
     return random.choice(list_like)
 
 
-def buildMap(obstacles_count: int) -> List[Obstacle]:
+def build_map(obstacles_count: int) -> List[Obstacle]:
     obstacles = None
     while obstacles is None:
-        obstacles = buildObstacles(obstacles=obstacles_count)
+        obstacles = build_obstacles(obstacles=obstacles_count)
 
-    mapCenter = Vector2(len(Constants.viewportX) / 2, len(Constants.viewportY) / 2)
+    map_center = Vector2(len(Constants.viewportX) / 2, len(Constants.viewportY) / 2)
     for o in obstacles:
         o.location = o.location.snapToIntegers()
-        if o.location.distanceTo(mapCenter) < Constants.OBSTACLE_GOLD_INCREASE_DISTANCE_1:
+        if o.location.distanceTo(map_center) < Constants.OBSTACLE_GOLD_INCREASE_DISTANCE_1:
             o.maxMineSize += 1
             o.gold += Constants.OBSTACLE_GOLD_INCREASE
-        if o.location.distanceTo(mapCenter) < Constants.OBSTACLE_GOLD_INCREASE_DISTANCE_2:
+        if o.location.distanceTo(map_center) < Constants.OBSTACLE_GOLD_INCREASE_DISTANCE_2:
             o.maxMineSize += 1
             o.gold += Constants.OBSTACLE_GOLD_INCREASE
     return obstacles
 
 
-def fixCollisions(entities: List[FieldObject], maxIterations: int = 999):
-    for _ in range(maxIterations):
-        if not collisionCheck(entities):
+def fix_collisions(entities: List[FieldObject], max_iterations: int = 999):
+    for _ in range(max_iterations):
+        if not collision_check(entities):
             return
 
 
@@ -556,7 +556,7 @@ class Structure:
         self.owner = owner
         self.obstacle = obstacle
 
-    def onComplete(self, ob=None):
+    def on_complete(self, ob=None):
         raise ValueError("Not Implemented")
 
     def act(self):
@@ -568,12 +568,12 @@ class Structure:
 
 class Mine(Structure):
 
-    def __init__(self, obstacle, owner, incomeRate):
+    def __init__(self, obstacle, owner, income_rate):
         super().__init__(owner, obstacle)
-        self.incomeRate = incomeRate
+        self.income_rate = income_rate
 
     def act(self):
-        cash = min(self.incomeRate, self.obstacle.gold)
+        cash = min(self.income_rate, self.obstacle.gold)
         self.owner.goldPerTurn += cash
         self.owner.gold += cash
         self.obstacle.gold -= cash
@@ -607,13 +607,13 @@ class Tower(Structure):
     def act(self):
         closestEnemy = None
         closestEnemyDist = None
-        for creep in self.owner.enemyPlayer.activeCreeps:
+        for creep in self.owner.enemy_player.activeCreeps:
             dist = self.obstacle.location.distanceTo(creep.location)
             if closestEnemyDist is None or dist < closestEnemyDist:
                 closestEnemyDist = dist
                 closestEnemy = creep
 
-        enemyQueen = self.owner.enemyPlayer.queenUnit
+        enemyQueen = self.owner.enemy_player.queenUnit
         if closestEnemy is not None and closestEnemy.location.distanceTo(self.obstacle.location) < self.attackRadius:
             self.damageCreep(closestEnemy)
         elif enemyQueen.location.distanceTo(self.obstacle.location) < self.attackRadius:
@@ -643,7 +643,7 @@ class Barracks(Structure):
             if self.progress == self.progressMax:
                 self.progress = 0
                 self.isTraining = False
-                self.onComplete(self.obstacle)  # create a creep ?
+                self.on_complete(self.obstacle)  # create a creep ?
         return False
 
 
@@ -761,7 +761,7 @@ class GiantCreep(Creep):
                 continue
             if not isinstance(struct.structure, Tower):
                 continue
-            if struct.structure.owner != self.owner.enemyPlayer:
+            if struct.structure.owner != self.owner.enemy_player:
                 continue
             opp_structures.append(struct)
 
@@ -780,8 +780,8 @@ class GiantCreep(Creep):
     def dealDamage(self):
         target = None
         for obs in self.obstacles:
-            if obs.structure is None or obs.structure.owner != self.owner.enemyPlayer or not isinstance(obs.structure,
-                                                                                                        Tower):
+            if obs.structure is None or obs.structure.owner != self.owner.enemy_player or not isinstance(obs.structure,
+                                                                                                         Tower):
                 continue
             dist = obs.location.distanceTo(self.location)
             if dist >= self.radius + obs.radius + Constants.TOUCHING_DELTA:
@@ -810,14 +810,14 @@ class KnightCreep(Creep):
 
     def dealDamage(self):
         self.attacksThisTurn = False
-        enemyQueen = self.owner.enemyPlayer.queenUnit
+        enemyQueen = self.owner.enemy_player.queenUnit
         if self.location.distanceTo(
                 enemyQueen.location) < self.radius + enemyQueen.radius + self.attackRange + Constants.TOUCHING_DELTA:
             self.attacksThisTurn = True
-            self.owner.enemyPlayer.health -= Constants.KNIGHT_DAMAGE
+            self.owner.enemy_player.health -= Constants.KNIGHT_DAMAGE
 
     def move(self, frames: float):
-        enemyQueen = self.owner.enemyPlayer.queenUnit
+        enemyQueen = self.owner.enemy_player.queenUnit
         # move toward enemy queen, if not yet in range
         if self.location.distanceTo(enemyQueen.location) > self.radius + enemyQueen.radius + self.attackRange:
             self.location = self.location.towards(
@@ -869,7 +869,7 @@ class ArcherCreep(Creep):
     def findTarget(self) -> Creep:
         min_dist = None
         target = None
-        for creep in self.owner.enemyPlayer.activeCreeps:
+        for creep in self.owner.enemy_player.activeCreeps:
             dist = creep.location.distanceTo(self.location)
             if min_dist is None or dist < min_dist:
                 min_dist = dist
@@ -903,7 +903,7 @@ class Player(AbstractPlayer):
                 "type": 0,
                 "type_name": "Mine",
                 "owner": self.fixOwner(struc.owner),
-                "income_rate": struc.incomeRate if visible else -1  # param1
+                "income_rate": struc.income_rate if visible else -1  # param1
             }
         elif isinstance(struc, Tower):
             struc_info = {
@@ -934,9 +934,9 @@ class Player(AbstractPlayer):
         }}
 
     def __init__(self, name):
-        self.isSecondPlayer = None
+        self.is_second_player = None
         self.queenUnit = None
-        self.enemyPlayer = None
+        self.enemy_player = None
         self.activeCreeps = []
         self.name = name
         self.outputs = [

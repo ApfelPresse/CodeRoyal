@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
             print("---")
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
         if plot:
             convert_to_gif("test_simple_move", frames)
@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
             print("---")
             if plot and i % 2 == 0:
                 frames.append(plot_current_frame(ref))
-            ref.gameTurn(i)
+            ref.game_turn(i)
 
         if plot:
             convert_to_gif("test_simple_collision_move", frames)
