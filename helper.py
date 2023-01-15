@@ -38,7 +38,7 @@ def plot_current_frame(ref, frame=0):
         game_json[key]["image"] = im
         # im.save(f'spriteso/tmp/{key}.png')
 
-    for i, player in enumerate(ref.gameManager.players):
+    for i, player in enumerate(ref.game_manager.players):
         width = 80
         x = player.queen_unit.location.x
         y = player.queen_unit.location.y
@@ -86,7 +86,7 @@ def plot_current_frame(ref, frame=0):
             plt.Circle((x, y), obstacle.radius, color="b", alpha=0.9, zorder=1))
 
     player_stats = []
-    for i, player in enumerate(ref.gameManager.players):
+    for i, player in enumerate(ref.game_manager.players):
         player_stats.append([])
         player_stats[i].append(f"Player {i}")
         player_stats[i].append(player.gold)

@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
 
         for i in range(40):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 if player.name == "red":
                     action = "BUILD 17 TOWER"
                     train = "TRAIN"
@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_tower_attacking_queen", frames)
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(queen_health[player.name], player.queen_unit.health)
 
     def test_build_tower_once_and_wait_for_destroying(self):
@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
 
         for i in range(140):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 action = "WAIT"
                 if player.name == "red":
                     if i <= 3:
@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_build_tower_once_and_wait_for_destroying", frames)
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(88, tower_health[player.name][-1])
             self.assertEqual(124, len(tower_health[player.name]))
             buildings = ref.get_buildings_of_player(player)

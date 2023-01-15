@@ -19,15 +19,15 @@ class Test(unittest.TestCase):
         })
 
         income = {
-            "red": ref.gameManager.players[0].gold,
+            "red": ref.game_manager.players[0].gold,
             "red_fixed": 187,
-            "blue": ref.gameManager.players[0].gold,
+            "blue": ref.game_manager.players[0].gold,
             "blue_fixed": 187,
         }
 
         for i in range(30):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 if player.name == "red":
                     action = "BUILD 8 MINE"
                     train = "TRAIN"
@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
                 player.outputs = [action, train]
             ref.game_turn(i)
 
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 buildings = ref.get_buildings_of_player(player)
                 if len(buildings) > 0:
                     struc = buildings[0].structure
@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
                     else:
                         ValueError("This should be a Mine")
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(income[player.name], player.gold)
             self.assertEqual(income[f"{player.name}_fixed"], player.gold)
 
@@ -58,13 +58,13 @@ class Test(unittest.TestCase):
         })
 
         income = {
-            "red": ref.gameManager.players[0].gold,
-            "blue": ref.gameManager.players[0].gold
+            "red": ref.game_manager.players[0].gold,
+            "blue": ref.game_manager.players[0].gold
         }
 
         for i in range(25):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 if player.name == "red":
                     action = "BUILD 8 MINE"
                     train = "TRAIN"
@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
                 player.outputs = [action, train]
             ref.game_turn(i)
 
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 buildings = ref.get_buildings_of_player(player)
                 if len(buildings) > 0:
                     struc = buildings[0].structure
@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
                     else:
                         ValueError("This should be a Mine")
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(income[player.name], player.gold)
             self.assertEqual(income[player.name], 172)
 
@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
 
         for i in range(233):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 action = "WAIT"
                 if player.name == "red":
                     if i <= 3:
@@ -110,11 +110,11 @@ class Test(unittest.TestCase):
                 player.outputs = [action, train]
             ref.game_turn(i)
 
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 if len(ref.get_buildings_of_player(player)) == 0:
                     break
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(0, len(ref.get_buildings_of_player(player)))
 
         for obs in ref.obstacles:

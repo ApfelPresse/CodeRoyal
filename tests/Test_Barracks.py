@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
 
         for i in range(27):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 action = "WAIT"
                 train = "TRAIN"
                 if player.name == "red":
@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_build_barracks_archer", frames)
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(len(player.active_creeps), 2)
             self.assertEqual(len(player.active_creeps), 2)
             self.assertEqual(player.gold, 0)
@@ -55,13 +55,13 @@ class Test(unittest.TestCase):
 
         ref.game_turn(0)
         ref.game_turn(0)
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(len(player.active_creeps), 1)
 
         for _ in range(11):
             ref.game_turn(0)
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(len(player.active_creeps), 0)
 
     def test_build_barracks_knight(self):
@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
 
         for i in range(35):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 action = "WAIT"
                 train = "TRAIN"
                 if player.name == "red":
@@ -108,7 +108,7 @@ class Test(unittest.TestCase):
                 "gold": 20
             }
         }
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(queen[player.name]["location"], player.queen_unit.location)
             self.assertEqual(queen[player.name]["health"], player.queen_unit.health)
             self.assertEqual(queen[player.name]["gold"], player.gold)
@@ -120,12 +120,12 @@ class Test(unittest.TestCase):
         plot = False
         frames = []
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             player.gold = 140
 
         for i in range(14):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 action = "WAIT"
                 train = "TRAIN"
                 if player.name == "red":
@@ -152,14 +152,14 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_build_barracks_giant_and_tower", frames)
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             buildings = ref.get_buildings_of_player(player)
             self.assertEqual(2, len(buildings))
 
         for i in range(28):
             ref.game_turn(0)
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             buildings = ref.get_buildings_of_player(player)
             self.assertEqual(1, len(buildings))
 
@@ -170,12 +170,12 @@ class Test(unittest.TestCase):
         plot = False
         frames = []
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             player.gold = 200
 
         for i in range(60):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 action = "WAIT"
                 train = "TRAIN"
                 if player.name == "red":
@@ -211,5 +211,5 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_build_barracks_knight_and_tower", frames)
 
-        for player in ref.gameManager.activePlayers:
+        for player in ref.game_manager.active_players:
             self.assertEqual(queen[player.name]["health"], player.health)

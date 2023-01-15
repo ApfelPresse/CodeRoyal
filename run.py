@@ -29,13 +29,13 @@ def main():
         "blue": {}
     }
     try:
-        for i in range(ref.gameManager.maxTurns):
+        for i in range(ref.game_manager.max_turns):
             print(f"Round {i}")
 
             # for player in self.gameManager.players:
             #     ent.extend(player.allUnits())
 
-            for j, player in enumerate(ref.gameManager.activePlayers):
+            for j, player in enumerate(ref.game_manager.active_players):
                 obs_for_player = []
                 touching_side: Obstacle = None
                 for obs in ref.obstacles:

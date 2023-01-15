@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
 
         for i in range(12):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 player.outputs = [
                     f"MOVE 500 500",
                     "TRAIN",
@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_simple_move", frames)
 
-        self.assertEqual(Vector2(500, 500), ref.gameManager.players[0].queen_unit.location)
+        self.assertEqual(Vector2(500, 500), ref.game_manager.players[0].queen_unit.location)
 
     def test_simple_collision_move(self):
         ref = Referee(params={
@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
 
         for i in range(25):
             print(f"Turn {i}")
-            for player in ref.gameManager.activePlayers:
+            for player in ref.game_manager.active_players:
                 player.outputs = [
                     f"MOVE 500 500",
                     "TRAIN",
@@ -63,5 +63,5 @@ class Test(unittest.TestCase):
         if plot:
             convert_to_gif("test_simple_collision_move", frames)
 
-        self.assertEqual(Vector2(475, 496), ref.gameManager.players[0].queen_unit.location)
-        self.assertEqual(Vector2(505, 501), ref.gameManager.players[1].queen_unit.location)
+        self.assertEqual(Vector2(475, 496), ref.game_manager.players[0].queen_unit.location)
+        self.assertEqual(Vector2(505, 501), ref.game_manager.players[1].queen_unit.location)
