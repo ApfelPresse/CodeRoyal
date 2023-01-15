@@ -138,8 +138,10 @@ class Referee:
 
             if isinstance(struc, Mine):
                 struc.income_rate += 1
+                print("Upgrade Mine")
                 if struc.income_rate > obs.max_mine_size:
                     struc.income_rate = obs.max_mine_size
+                    print(f"Mine is max {struc.income_rate}")
             else:
                 obs.set_mine(player)
         elif first_token == "TOWER":
@@ -165,6 +167,8 @@ class Referee:
             obs.set_barracks(player, creep_type)
         else:
             raise ValueError(f"Invalid structure type: {first_token}")
+
+
         scheduled_buildings.append(player)
 
         return obstacles_attempted_to_build_upon, scheduled_buildings

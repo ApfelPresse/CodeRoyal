@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from helper import plot_current_frame, convert_to_gif
+from sprites.sprites import plot_current_frame, convert_to_gif
 from original.ref import Referee, Vector2
 
 

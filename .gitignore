@@ -1,7 +1,5 @@
 .idea
 kt/
-/**.gif
-/**.java
-/spriteso/tmp/
-/tests/gifs/
-/tests/gifs/
+/**/*.gif
+/**/*.java
+/sprites/tmp/

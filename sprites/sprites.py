@@ -1,4 +1,5 @@
 import json
+import pathlib
 
 import imageio
 import numpy as np
@@ -7,6 +8,13 @@ from matplotlib import pyplot as plt
 from matplotlib.pyplot import text
 
 from original.ref import Constants, Tower, Mine, Barracks
+
+
+def read_image(image_file_name):
+    try:
+        return plt.imread(image_file_name)
+    except FileNotFoundError as ex:
+        return plt.imread(f"../{image_file_name}")
 
 
 def plot_current_frame(ref, frame=0):
@@ -23,15 +31,15 @@ def plot_current_frame(ref, frame=0):
 
     ax.add_patch(plt.Circle((width // 2, height // 2), 500, color="white", alpha=0, zorder=0))
 
-    background = plt.imread("spriteso/Background.jpg")
+    background = plt.imread(pathlib.Path(__file__).parent.joinpath("Background.jpg"))
     axin = ax.inset_axes([0, 0, width, height], transform=ax.transData, zorder=1)
     axin.imshow(background)
     axin.axis('off')
 
-    with open("spriteso/game.json", "r") as file:
+    with open(pathlib.Path(__file__).parent.joinpath("game.json")) as file:
         game_json = json.loads(file.read())["frames"]
 
-    game_image = Image.open("spriteso/game.png")
+    game_image = Image.open(pathlib.Path(__file__).parent.joinpath("game.png"))
     for key in game_json.keys():
         item = game_json[key]["frame"]
         im = game_image.crop((item["x"], item["y"], item["x"] + item["w"], item["y"] + item["h"]))

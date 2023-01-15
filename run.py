@@ -1,10 +1,11 @@
 import random
+from typing import Optional
 
 import numpy as np
 
 from boss import handle_boss_3
-from helper import plot_current_frame, convert_to_gif
-from ref import Referee, Obstacle
+from sprites.sprites import plot_current_frame, convert_to_gif
+from original.ref import Referee, Obstacle
 
 
 def main():
@@ -18,7 +19,6 @@ def main():
     ref = Referee(params)
 
     frames = []
-    tix = 20
 
     players = {
         "red": handle_boss_3,
@@ -32,12 +32,9 @@ def main():
         for i in range(ref.game_manager.max_turns):
             print(f"Round {i}")
 
-            # for player in self.gameManager.players:
-            #     ent.extend(player.allUnits())
-
             for j, player in enumerate(ref.game_manager.active_players):
                 obs_for_player = []
-                touching_side: Obstacle = None
+                touching_side: Optional[Obstacle] = None
                 for obs in ref.obstacles:
                     if player.queen_unit.is_in_range_of(obs):
                         touching_side = obs
@@ -52,12 +49,13 @@ def main():
                 }, ref.all_units()))
                 info = {
                     "gold": player.gold,
-                    "queen_touching": touching_side.obstacleId if touching_side is not None else -1,
+                    "queen_touching": touching_side.obstacle_id if touching_side is not None else -1,
                     "obstacles": obs_for_player,
                     "units": units
                 }
 
                 _last, player.outputs = players[player.name](last[player.name], info)
+                print(player.outputs)
                 last[player.name] = _last
 
             if i % 2 == 0:
