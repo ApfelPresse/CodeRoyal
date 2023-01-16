@@ -361,8 +361,8 @@ class Referee:
                 player.active_creeps.remove(it)
 
         for player in self.game_manager.active_players:
-            player.check_queen_health()
-            self.end_game = True
+            if player.is_queen_dead():
+                self.end_game = True
 
         for it in self.all_entities():
             it.location = it.location.snap_to_integers()
@@ -497,8 +497,10 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
         collision_check(obs, float(Constants.OBSTACLE_GAP))
     return obs
 
+
 def sample(list_like):
     return random.choice(list_like)
+
 
 def build_map(obstacles_count: int) -> List[Obstacle]:
     obstacles = None
@@ -515,6 +517,7 @@ def build_map(obstacles_count: int) -> List[Obstacle]:
             o.max_mine_size += 1
             o.gold += Constants.OBSTACLE_GOLD_INCREASE
     return obstacles
+
 
 def fix_collisions(entities: List[FieldObject], max_iterations: int = 999):
     for _ in range(max_iterations):
@@ -631,7 +634,6 @@ class Barracks(Structure):
 class Unit(FieldObject):
     unit_type: int
     owner: Player
-    max_health: int
     health: int
 
     def __init__(self, owner, unit_type):
@@ -639,7 +641,6 @@ class Unit(FieldObject):
         self.unit_type = unit_type
         self.owner = owner
         self.location = Vector2()
-        self.max_health = 0
         self.health = 0
 
     @abstractmethod
@@ -653,7 +654,6 @@ class Queen(Unit):
         super().__init__(owner, -1)
         self.mass = Constants.QUEEN_MASS
         self.radius = Constants.QUEEN_RADIUS
-        self.max_health = Constants.QUEEN_HP
 
     def move_towards(self, target: Vector2):
         self.location = self.location.towards(target, Constants.QUEEN_SPEED)
@@ -895,10 +895,11 @@ class Player:
         ent.append(self.queen_unit)
         return ent
 
-    def check_queen_health(self):
+    def is_queen_dead(self):
         self.queen_unit.health = self.health  # << really ?? double bookkeeping here.
-        if self.health == 0:
-            raise Exception("DEAD QUEEN")
+        if self.health <= 0:
+            return True
+        return False
 
     def kill(self, reason):
         self.score = -1
@@ -1003,8 +1004,8 @@ class Constants:
     WORLD_WIDTH = 1920
     WORLD_HEIGHT = 1000
 
-    viewportX = list(range(0, WORLD_WIDTH + 1))#np.arange(0, WORLD_WIDTH + 1)
-    viewportY = list(range(0, WORLD_HEIGHT + 1)) # np.arange(0, WORLD_HEIGHT + 1)
+    viewportX = list(range(0, WORLD_WIDTH + 1))  # np.arange(0, WORLD_WIDTH + 1)
+    viewportY = list(range(0, WORLD_HEIGHT + 1))  # np.arange(0, WORLD_HEIGHT + 1)
 
     QUEEN_SPEED = 60
     TOWER_HP_INITIAL = 200
@@ -1020,9 +1021,9 @@ class Constants:
     GIANT_BUST_RATE = 80
 
     OBSTACLE_GAP = 90
-    OBSTACLE_RADIUS_RANGE = list(range(60, 90 + 1)) # np.arange(60, 90 + 1)  # 60..90
-    OBSTACLE_GOLD_RANGE = list(range(200, 250 + 1))# np.arange(200, 250 + 1)  # 200..250
-    OBSTACLE_MINE_BASE_SIZE_RANGE = list(range(1, 3 + 1)) #np.arange(1, 3 + 1)  # 1..3
+    OBSTACLE_RADIUS_RANGE = list(range(60, 90 + 1))  # np.arange(60, 90 + 1)  # 60..90
+    OBSTACLE_GOLD_RANGE = list(range(200, 250 + 1))  # np.arange(200, 250 + 1)  # 200..250
+    OBSTACLE_MINE_BASE_SIZE_RANGE = list(range(1, 3 + 1))  # np.arange(1, 3 + 1)  # 1..3
     OBSTACLE_GOLD_INCREASE = 50
     OBSTACLE_GOLD_INCREASE_DISTANCE_1 = 500
     OBSTACLE_GOLD_INCREASE_DISTANCE_2 = 200
@@ -1034,7 +1035,7 @@ class Constants:
 
     QUEEN_RADIUS = 30
     QUEEN_MASS = 10000
-    QUEEN_HP = list(range(5, 20 + 1)) # np.arange(5, 20 + 1)  # 5..20
+    QUEEN_HP = list(range(5, 20 + 1))  # np.arange(5, 20 + 1)  # 5..20
     QUEEN_HP_MULT = 5  # i.e. 25. .100 by 5
     QUEEN_VISION = 300
 

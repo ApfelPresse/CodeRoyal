@@ -1002,8 +1002,8 @@ class Constants:
     WORLD_WIDTH = 1920
     WORLD_HEIGHT = 1000
 
-    viewportX = list(range(0, WORLD_WIDTH + 1))#np.arange(0, WORLD_WIDTH + 1)
-    viewportY = list(range(0, WORLD_HEIGHT + 1)) # np.arange(0, WORLD_HEIGHT + 1)
+    viewportX = list(range(0, WORLD_WIDTH + 1))  # np.arange(0, WORLD_WIDTH + 1)
+    viewportY = list(range(0, WORLD_HEIGHT + 1))  # np.arange(0, WORLD_HEIGHT + 1)
 
     QUEEN_SPEED = 60
     TOWER_HP_INITIAL = 200
@@ -1019,9 +1019,9 @@ class Constants:
     GIANT_BUST_RATE = 80
 
     OBSTACLE_GAP = 90
-    OBSTACLE_RADIUS_RANGE = list(range(60, 90 + 1)) # np.arange(60, 90 + 1)  # 60..90
-    OBSTACLE_GOLD_RANGE = list(range(200, 250 + 1))# np.arange(200, 250 + 1)  # 200..250
-    OBSTACLE_MINE_BASE_SIZE_RANGE = list(range(1, 3 + 1)) #np.arange(1, 3 + 1)  # 1..3
+    OBSTACLE_RADIUS_RANGE = list(range(60, 90 + 1))  # np.arange(60, 90 + 1)  # 60..90
+    OBSTACLE_GOLD_RANGE = list(range(200, 250 + 1))  # np.arange(200, 250 + 1)  # 200..250
+    OBSTACLE_MINE_BASE_SIZE_RANGE = list(range(1, 3 + 1))  # np.arange(1, 3 + 1)  # 1..3
     OBSTACLE_GOLD_INCREASE = 50
     OBSTACLE_GOLD_INCREASE_DISTANCE_1 = 500
     OBSTACLE_GOLD_INCREASE_DISTANCE_2 = 200
@@ -1033,7 +1033,7 @@ class Constants:
 
     QUEEN_RADIUS = 30
     QUEEN_MASS = 10000
-    QUEEN_HP = list(range(5, 20 + 1)) # np.arange(5, 20 + 1)  # 5..20
+    QUEEN_HP = list(range(5, 20 + 1))  # np.arange(5, 20 + 1)  # 5..20
     QUEEN_HP_MULT = 5  # i.e. 25. .100 by 5
     QUEEN_VISION = 300
 
