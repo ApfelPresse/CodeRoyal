@@ -361,8 +361,8 @@ class Referee:
                 player.active_creeps.remove(it)
 
         for player in self.game_manager.active_players:
-            player.check_queen_health()
-            self.end_game = True
+            if player.queen_unit.health <= 0:
+                self.end_game = True
 
         for it in self.all_entities():
             it.location = it.location.snap_to_integers()
@@ -634,7 +634,6 @@ class Barracks(Structure):
 class Unit(FieldObject):
     unit_type: int
     owner: Player
-    max_health: int
     health: int
 
     def __init__(self, owner, unit_type):
@@ -642,7 +641,6 @@ class Unit(FieldObject):
         self.unit_type = unit_type
         self.owner = owner
         self.location = Vector2()
-        self.max_health = 0
         self.health = 0
 
     @abstractmethod
@@ -656,7 +654,6 @@ class Queen(Unit):
         super().__init__(owner, -1)
         self.mass = Constants.QUEEN_MASS
         self.radius = Constants.QUEEN_RADIUS
-        self.max_health = Constants.QUEEN_HP
 
     def move_towards(self, target: Vector2):
         self.location = self.location.towards(target, Constants.QUEEN_SPEED)
@@ -818,9 +815,6 @@ class ArcherCreep(Creep):
 
 
 class Player:
-    # activeCreeps: List[Creep]
-    # queen_unit: Optional[Queen]
-
     is_second_player: bool
     queen_unit: Optional[Queen]
     enemy_player: Optional[Player]
@@ -897,11 +891,6 @@ class Player:
         ent.extend(self.active_creeps)
         ent.append(self.queen_unit)
         return ent
-
-    def check_queen_health(self):
-        self.queen_unit.health = self.health  # << really ?? double bookkeeping here.
-        if self.health == 0:
-            raise Exception("DEAD QUEEN")
 
     def kill(self, reason):
         self.score = -1
@@ -1004,8 +993,8 @@ class Constants:
     WORLD_WIDTH = 1920
     WORLD_HEIGHT = 1000
 
-    viewportX = list(range(0, WORLD_WIDTH + 1))#np.arange(0, WORLD_WIDTH + 1)
-    viewportY = list(range(0, WORLD_HEIGHT + 1)) # np.arange(0, WORLD_HEIGHT + 1)
+    viewportX = list(range(0, WORLD_WIDTH + 1))  # np.arange(0, WORLD_WIDTH + 1)
+    viewportY = list(range(0, WORLD_HEIGHT + 1))  # np.arange(0, WORLD_HEIGHT + 1)
 
     QUEEN_SPEED = 60
     TOWER_HP_INITIAL = 200
@@ -1021,9 +1010,9 @@ class Constants:
     GIANT_BUST_RATE = 80
 
     OBSTACLE_GAP = 90
-    OBSTACLE_RADIUS_RANGE = list(range(60, 90 + 1)) # np.arange(60, 90 + 1)  # 60..90
-    OBSTACLE_GOLD_RANGE = list(range(200, 250 + 1))# np.arange(200, 250 + 1)  # 200..250
-    OBSTACLE_MINE_BASE_SIZE_RANGE = list(range(1, 3 + 1)) #np.arange(1, 3 + 1)  # 1..3
+    OBSTACLE_RADIUS_RANGE = list(range(60, 90 + 1))  # np.arange(60, 90 + 1)  # 60..90
+    OBSTACLE_GOLD_RANGE = list(range(200, 250 + 1))  # np.arange(200, 250 + 1)  # 200..250
+    OBSTACLE_MINE_BASE_SIZE_RANGE = list(range(1, 3 + 1))  # np.arange(1, 3 + 1)  # 1..3
     OBSTACLE_GOLD_INCREASE = 50
     OBSTACLE_GOLD_INCREASE_DISTANCE_1 = 500
     OBSTACLE_GOLD_INCREASE_DISTANCE_2 = 200
@@ -1035,7 +1024,7 @@ class Constants:
 
     QUEEN_RADIUS = 30
     QUEEN_MASS = 10000
-    QUEEN_HP = list(range(5, 20 + 1)) # np.arange(5, 20 + 1)  # 5..20
+    QUEEN_HP = list(range(5, 20 + 1))  # np.arange(5, 20 + 1)  # 5..20
     QUEEN_HP_MULT = 5  # i.e. 25. .100 by 5
     QUEEN_VISION = 300
 

@@ -5,7 +5,7 @@ import numpy as np
 
 from boss import handle_boss_3
 from sprites.sprites import plot_current_frame, convert_to_gif
-from original.ref import Referee, Obstacle
+from optimized.ref import Referee, Obstacle
 from util import timeit
 
 
@@ -32,10 +32,10 @@ def main():
         "blue": {}
     }
     try:
-        from auto_profiler import Profiler
-        with Profiler(depth=5):
-            # for i in range(ref.game_manager.max_turns):
-            for i in range(25):
+        # from auto_profiler import Profiler
+        # with Profiler(depth=5):
+            for i in range(ref.game_manager.max_turns):
+            # for i in range(25):
                 print(f"Round {i}")
 
                 for j, player in enumerate(ref.game_manager.active_players):
