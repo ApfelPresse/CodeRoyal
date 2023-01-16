@@ -369,6 +369,7 @@ cdef class Referee:
 def flat_map(array: List[List]):
     return reduce(list.__add__, array)
 
+
 cdef class FieldObject:
     cdef Optional[Vector2] location
     cdef int radius

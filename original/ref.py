@@ -8,7 +8,6 @@ from typing import List, Optional
 
 import numpy as np
 
-
 class GameManager:
     max_turns: int
     league_level: int
@@ -29,12 +28,17 @@ class GameManager:
         self.league_level = league_level
         self.max_turns = 200
 
-
 class Referee:
     obstacles: List[Obstacle]
     game_manager: GameManager
-
     end_game: bool
+    turn: int
+    towers: bool
+    giants: bool
+    mines: bool
+    fixed_income: int
+    obstacle_count: int
+    queen_hp: int
 
     def __init__(self, params, solo=False):
         self.obstacles = []
@@ -365,11 +369,10 @@ class Referee:
 def flat_map(array: List[List]):
     return reduce(list.__add__, array)
 
-
 class FieldObject:
     location: Optional[Vector2]
-    radius = int
-    mass = int
+    radius: int
+    mass: int
 
     def __init__(self):
         self.location = None
@@ -410,12 +413,16 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
                 return True
     return False
 
-
 class Obstacle(FieldObject):
     structure: Optional[Structure]
     obstacle_id: int
+    max_mine_size: int
+    gold: int
+    params: dict
+    obstacle_title_id: int
+    area: int
 
-    def __init__(self, max_mine_size, initial_gold, initial_radius, initial_location, obstacle_id):
+    def __init__(self, max_mine_size: int, initial_gold: int, initial_radius: int, initial_location: Vector2, obstacle_id: int):
         super().__init__()
 
         self.structure = None
@@ -474,7 +481,6 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
 
     obstacles = flat_map(obstacle_pairs)
 
-    collision_results = []
     for i in range(1, 100 + 1):
         for pair in obstacle_pairs:
             o1, o2 = pair
@@ -483,7 +489,7 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
             o1.location = mid
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
-        collision_results.append(collision_check(obstacles, float(Constants.OBSTACLE_GAP)))
+        collision_check(obstacles, float(Constants.OBSTACLE_GAP))
     return obstacles
 
 
@@ -516,6 +522,9 @@ def fix_collisions(entities: List[FieldObject], max_iterations: int = 999):
 
 class Structure:
 
+    owner: Player
+    obstacle: Obstacle
+
     def __init__(self, owner, obstacle):
         self.owner = owner
         self.obstacle = obstacle
@@ -531,6 +540,8 @@ class Structure:
 
 
 class Mine(Structure):
+
+    income_rate: int
 
     def __init__(self, obstacle, owner, income_rate):
         super().__init__(owner, obstacle)
@@ -549,6 +560,7 @@ class Mine(Structure):
 class Tower(Structure):
     attack_radius: int
     health: int
+    attack_range: Creep
 
     def __init__(self, obstacle, owner, attack_radius, health):
         super().__init__(owner, obstacle)
@@ -590,8 +602,12 @@ class Tower(Structure):
             return True
         return False
 
-
 class Barracks(Structure):
+
+    is_training: bool
+    progress_max: int
+    progress: int
+    creep_type: CreepType
 
     def __init__(self, obstacle: Obstacle, owner: Player, creep_type: CreepType):
         super().__init__(owner, obstacle)
@@ -611,11 +627,9 @@ class Barracks(Structure):
                 self.on_complete(self.obstacle)  # create a creep ?
         return False
 
-
 class Unit(FieldObject):
     unit_type: int
     owner: Player
-    location: Vector2
     max_health: int
     health: int
 
@@ -655,6 +669,11 @@ class Queen(Unit):
 
 class Creep(Unit):
 
+    speed: int
+    attack_range: int
+    last_location: Optional[Vector2]
+    attacks_this_turn: bool
+
     def __init__(self, owner, creep_type):
         super().__init__(owner, creep_type.ordinal)
         self.speed = creep_type.speed
@@ -663,6 +682,8 @@ class Creep(Unit):
         self.maxHealth = creep_type.hp
         self.radius = creep_type.radius
         self.health = creep_type.hp
+        self.last_location = None
+        self.attacks_this_turn = False
 
     def damage(self, damage_amount):
         if damage_amount <= 0:
@@ -729,18 +750,16 @@ class KnightCreep(Creep):
     def __init__(self, owner):
         super().__init__(owner, KNIGHT)
         self.owner = owner
-        self.lastLocation = None
-        self.attacksThisTurn = False
 
     def __str__(self):
         return f"KnightCreep - {self.location}"
 
     def deal_damage(self):
-        self.attacksThisTurn = False
+        self.attacks_this_turn = False
         enemy_queen = self.owner.enemy_player.queen_unit
         if self.location.distance_to(
                 enemy_queen.location) < self.radius + enemy_queen.radius + self.attack_range + Constants.TOUCHING_DELTA:
-            self.attacksThisTurn = True
+            self.attacks_this_turn = True
             self.owner.enemy_player.health -= Constants.KNIGHT_DAMAGE
 
     def move(self, frames: float):
@@ -750,7 +769,6 @@ class KnightCreep(Creep):
             self.location = self.location.towards(
                 (enemy_queen.location + (self.location - enemy_queen.location).resized_to(3.0)),
                 self.speed * frames)
-
 
 class ArcherCreep(Creep):
 
@@ -797,10 +815,21 @@ class ArcherCreep(Creep):
 
 class Player:
     # activeCreeps: List[Creep]
+    # queen_unit: Optional[Queen]
+
+    is_second_player: bool
     queen_unit: Optional[Queen]
+    enemy_player: Optional[Player]
+    active_creeps: List
+    name: str
+    outputs: List
+    score: int
+    gold: int
+    health: int
+    gold_per_turn: int
 
     def __init__(self, name):
-        self.is_second_player = None
+        self.is_second_player = False
         self.queen_unit = None
         self.enemy_player = None
         self.active_creeps = []
@@ -810,7 +839,7 @@ class Player:
             "",
         ]
 
-        self.health = None
+        self.health = -1
         self.score = -2
         self.gold = Constants.STARTING_GOLD
         self.gold_per_turn = 0
