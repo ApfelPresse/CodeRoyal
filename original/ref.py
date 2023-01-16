@@ -489,7 +489,8 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
             o1.location = mid
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
-        collision_check(obstacles, float(Constants.OBSTACLE_GAP))
+        if not collision_check(obstacles, float(Constants.OBSTACLE_GAP)):
+            break
     return obstacles
 
 
