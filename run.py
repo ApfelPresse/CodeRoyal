@@ -34,7 +34,8 @@ def main():
     try:
         from auto_profiler import Profiler
         with Profiler(depth=5):
-            for i in range(22):
+            # for i in range(ref.game_manager.max_turns):
+            for i in range(25):
                 print(f"Round {i}")
 
                 for j, player in enumerate(ref.game_manager.active_players):

@@ -484,10 +484,9 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
 
         obstacle_pairs.append([o1, o2])
 
-    obstacles = flat_map(obstacle_pairs)
+    obs = flat_map(obstacle_pairs)
 
     for i in range(1, 100 + 1):
-        print(i)
         for pair in obstacle_pairs:
             o1, o2 = pair
             mid = (o1.location + Vector2(Constants.WORLD_WIDTH - o2.location.x,
@@ -495,8 +494,8 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
             o1.location = mid
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
-        collision_check(obstacles, float(Constants.OBSTACLE_GAP))
-    return obstacles
+        collision_check(obs, float(Constants.OBSTACLE_GAP))
+    return obs
 
 
 def sample(list_like):
@@ -1005,8 +1004,8 @@ class Constants:
     WORLD_WIDTH = 1920
     WORLD_HEIGHT = 1000
 
-    viewportX = np.arange(0, WORLD_WIDTH + 1)
-    viewportY = np.arange(0, WORLD_HEIGHT + 1)
+    viewportX = list(range(0, WORLD_WIDTH + 1))#np.arange(0, WORLD_WIDTH + 1)
+    viewportY = list(range(0, WORLD_HEIGHT + 1)) # np.arange(0, WORLD_HEIGHT + 1)
 
     QUEEN_SPEED = 60
     TOWER_HP_INITIAL = 200
@@ -1022,13 +1021,13 @@ class Constants:
     GIANT_BUST_RATE = 80
 
     OBSTACLE_GAP = 90
-    OBSTACLE_RADIUS_RANGE = np.arange(60, 90 + 1)  # 60..90
-    OBSTACLE_GOLD_RANGE = np.arange(200, 250 + 1)  # 200..250
-    OBSTACLE_MINE_BASE_SIZE_RANGE = np.arange(1, 3 + 1)  # 1..3
+    OBSTACLE_RADIUS_RANGE = list(range(60, 90 + 1)) # np.arange(60, 90 + 1)  # 60..90
+    OBSTACLE_GOLD_RANGE = list(range(200, 250 + 1))# np.arange(200, 250 + 1)  # 200..250
+    OBSTACLE_MINE_BASE_SIZE_RANGE = list(range(1, 3 + 1)) #np.arange(1, 3 + 1)  # 1..3
     OBSTACLE_GOLD_INCREASE = 50
     OBSTACLE_GOLD_INCREASE_DISTANCE_1 = 500
     OBSTACLE_GOLD_INCREASE_DISTANCE_2 = 200
-    OBSTACLE_PAIRS = np.arange(6, 12 + 1)  # 6..12
+    OBSTACLE_PAIRS = list(range(6, 12 + 1))  # np.arange(6, 12 + 1)  # 6..12
 
     KNIGHT_DAMAGE = 1
     ARCHER_DAMAGE = 2
@@ -1036,7 +1035,7 @@ class Constants:
 
     QUEEN_RADIUS = 30
     QUEEN_MASS = 10000
-    QUEEN_HP = np.arange(5, 20 + 1)  # 5..20
+    QUEEN_HP = list(range(5, 20 + 1)) # np.arange(5, 20 + 1)  # 5..20
     QUEEN_HP_MULT = 5  # i.e. 25. .100 by 5
     QUEEN_VISION = 300
 
