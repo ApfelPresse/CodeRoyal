@@ -8,6 +8,7 @@ from typing import List, Optional
 
 import numpy as np
 
+
 class GameManager:
     max_turns: int
     league_level: int
@@ -27,6 +28,7 @@ class GameManager:
         self.active_players = self.players
         self.league_level = league_level
         self.max_turns = 200
+
 
 class Referee:
     obstacles: List[Obstacle]
@@ -369,6 +371,7 @@ class Referee:
 def flat_map(array: List[List]):
     return reduce(list.__add__, array)
 
+
 class FieldObject:
     location: Optional[Vector2]
     radius: int
@@ -413,6 +416,7 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
                 return True
     return False
 
+
 class Obstacle(FieldObject):
     structure: Optional[Structure]
     obstacle_id: int
@@ -422,7 +426,8 @@ class Obstacle(FieldObject):
     obstacle_title_id: int
     area: int
 
-    def __init__(self, max_mine_size: int, initial_gold: int, initial_radius: int, initial_location: Vector2, obstacle_id: int):
+    def __init__(self, max_mine_size: int, initial_gold: int, initial_radius: int, initial_location: Vector2,
+                 obstacle_id: int):
         super().__init__()
 
         self.structure = None
@@ -482,6 +487,7 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
     obstacles = flat_map(obstacle_pairs)
 
     for i in range(1, 100 + 1):
+        print(i)
         for pair in obstacle_pairs:
             o1, o2 = pair
             mid = (o1.location + Vector2(Constants.WORLD_WIDTH - o2.location.x,
@@ -489,8 +495,7 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
             o1.location = mid
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
-        if not collision_check(obstacles, float(Constants.OBSTACLE_GAP)):
-            break
+        collision_check(obstacles, float(Constants.OBSTACLE_GAP))
     return obstacles
 
 
@@ -522,7 +527,6 @@ def fix_collisions(entities: List[FieldObject], max_iterations: int = 999):
 
 
 class Structure:
-
     owner: Player
     obstacle: Obstacle
 
@@ -541,7 +545,6 @@ class Structure:
 
 
 class Mine(Structure):
-
     income_rate: int
 
     def __init__(self, obstacle, owner, income_rate):
@@ -603,8 +606,8 @@ class Tower(Structure):
             return True
         return False
 
-class Barracks(Structure):
 
+class Barracks(Structure):
     is_training: bool
     progress_max: int
     progress: int
@@ -627,6 +630,7 @@ class Barracks(Structure):
                 self.is_training = False
                 self.on_complete(self.obstacle)  # create a creep ?
         return False
+
 
 class Unit(FieldObject):
     unit_type: int
@@ -669,7 +673,6 @@ class Queen(Unit):
 
 
 class Creep(Unit):
-
     speed: int
     attack_range: int
     last_location: Optional[Vector2]
@@ -770,6 +773,7 @@ class KnightCreep(Creep):
             self.location = self.location.towards(
                 (enemy_queen.location + (self.location - enemy_queen.location).resized_to(3.0)),
                 self.speed * frames)
+
 
 class ArcherCreep(Creep):
 
