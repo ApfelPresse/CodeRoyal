@@ -361,8 +361,8 @@ class Referee:
                 player.active_creeps.remove(it)
 
         for player in self.game_manager.active_players:
-            if player.queen_unit.health <= 0:
-                self.end_game = True
+            player.check_queen_health()
+            self.end_game = True
 
         for it in self.all_entities():
             it.location = it.location.snap_to_integers()
@@ -845,7 +845,6 @@ class Player:
         self.gold = Constants.STARTING_GOLD
         self.gold_per_turn = 0
 
-
     def print_obstacle_per_turn(self, obstacle: Obstacle):
         struc = obstacle.structure
         visible = (struc is not None and struc.owner.name == self.name) or obstacle.location.distance_to(
@@ -895,6 +894,11 @@ class Player:
         ent.extend(self.active_creeps)
         ent.append(self.queen_unit)
         return ent
+
+    def check_queen_health(self):
+        self.queen_unit.health = self.health  # << really ?? double bookkeeping here.
+        if self.health == 0:
+            raise Exception("DEAD QUEEN")
 
     def kill(self, reason):
         self.score = -1
