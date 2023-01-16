@@ -175,7 +175,7 @@ cdef class Referee:
 
         return obstacles_attempted_to_build_upon, scheduled_buildings
 
-    cdef process_player_actions(self, turn):
+    cdef process_player_actions(self, int turn):
         obstacles_attempted_to_build_upon = []
         scheduled_buildings = []
 
@@ -517,6 +517,10 @@ def fix_collisions(entities: List[FieldObject], max_iterations: int = 999):
             return
 
 cdef class Structure:
+
+    cdef public Player owner
+    cdef Obstacle obstacle
+
     def __init__(self, owner, obstacle):
         self.owner = owner
         self.obstacle = obstacle
@@ -531,6 +535,9 @@ cdef class Structure:
         return f"{self.owner} - {self.obstacle}"
 
 cdef class Mine(Structure):
+
+    cdef public int income_rate
+
     def __init__(self, obstacle, owner, income_rate):
         super().__init__(owner, obstacle)
         self.income_rate = income_rate
@@ -545,8 +552,9 @@ cdef class Mine(Structure):
         return False
 
 cdef class Tower(Structure):
-    attack_radius: int
-    health: int
+    cdef public int attack_radius
+    cdef public health
+    cdef Creep attack_target
 
     def __init__(self, obstacle, owner, attack_radius, health):
         super().__init__(owner, obstacle)
@@ -589,6 +597,12 @@ cdef class Tower(Structure):
         return False
 
 cdef class Barracks(Structure):
+
+    cdef bint is_training
+    cdef int progress
+    cdef int progress_max
+    cdef CreepType creep_type
+
     def __init__(self, obstacle: Obstacle, owner: Player, creep_type: CreepType):
         super().__init__(owner, obstacle)
         self.obstacle = obstacle
@@ -608,11 +622,10 @@ cdef class Barracks(Structure):
         return False
 
 cdef class Unit(FieldObject):
-    unit_type: int
-    owner: Player
-    location: Vector2
-    max_health: int
-    health: int
+    cdef int unit_type
+    cdef Player owner
+    cdef int max_health
+    cdef int health
 
     def __init__(self, owner, unit_type):
         super().__init__()
@@ -626,6 +639,7 @@ cdef class Unit(FieldObject):
         pass
 
 cdef class Queen(Unit):
+
     def __init__(self, owner):
         super().__init__(owner, -1)
         self.mass = Constants.QUEEN_MASS
@@ -645,6 +659,13 @@ cdef class Queen(Unit):
         return dist < self.radius + obs.radius + Constants.TOUCHING_DELTA
 
 cdef class Creep(Unit):
+
+    cdef int speed
+    cdef int attack_range
+
+    cdef Vector2 last_location
+    cdef bint attacks_this_turn
+
     def __init__(self, owner, creep_type):
         super().__init__(owner, creep_type.ordinal)
         self.speed = creep_type.speed
@@ -653,6 +674,10 @@ cdef class Creep(Unit):
         self.maxHealth = creep_type.hp
         self.radius = creep_type.radius
         self.health = creep_type.hp
+
+        self.last_location = None
+        self.attacks_this_turn = False
+
 
     cdef damage(self, damage_amount):
         if damage_amount <= 0:
@@ -711,21 +736,20 @@ cdef class GiantCreep(Creep):
         target.structure.health = min(0, target.structure.health - Constants.GIANT_BUST_RATE)
 
 cdef class KnightCreep(Creep):
+
     def __init__(self, owner):
         super().__init__(owner, KNIGHT)
         self.owner = owner
-        self.lastLocation = None
-        self.attacksThisTurn = False
 
     def __str__(self):
         return f"KnightCreep - {self.location}"
 
     cdef deal_damage(self):
-        self.attacksThisTurn = False
+        self.attacks_this_turn = False
         enemy_queen = self.owner.enemy_player.queen_unit
         if self.location.distance_to(
                 enemy_queen.location) < self.radius + enemy_queen.radius + self.attack_range + Constants.TOUCHING_DELTA:
-            self.attacksThisTurn = True
+            self.attacks_this_turn = True
             self.owner.enemy_player.health -= Constants.KNIGHT_DAMAGE
 
     cdef move(self, float frames):
@@ -779,10 +803,21 @@ cdef class ArcherCreep(Creep):
 
 cdef class Player:
     # activeCreeps: List[Creep]
-    queen_unit: Optional[Queen]
+    # queen_unit: Optional[Queen]
+
+    cdef bint is_second_player
+    cdef Queen queen_unit
+    cdef Player enemy_player
+    cdef List active_creeps
+    cdef str name
+    cdef List outputs
+    cdef int score
+    cdef int gold
+    cdef int health
+    cdef int gold_per_turn
 
     def __init__(self, name):
-        self.is_second_player = None
+        self.is_second_player = False
         self.queen_unit = None
         self.enemy_player = None
         self.active_creeps = []
@@ -792,7 +827,7 @@ cdef class Player:
             "",
         ]
 
-        self.health = None
+        self.health = -1
         self.score = -2
         self.gold = Constants.STARTING_GOLD
         self.gold_per_turn = 0
@@ -990,17 +1025,17 @@ cdef class Constants:
     WOOD_FIXED_INCOME = 10
 
 cdef class CreepType:
-    ordinal: int
-    count: int
-    cost: int
-    speed: int
-    range: int
-    attack_range: int
-    radius: int
-    mass: int
-    hp: int
-    build_time: int
-    asset_name: str
+    cdef int ordinal
+    cdef int count
+    cdef int cost
+    cdef int speed
+    cdef int range
+    cdef int attack_range
+    cdef int radius
+    cdef int mass
+    cdef int hp
+    cdef int build_time
+    cdef str asset_name
 
     def __init__(self, count, cost, speed, range_, radius, mass, hp, build_time, asset_name, ordinal=-1):
         self.ordinal = ordinal
