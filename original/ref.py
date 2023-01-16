@@ -361,8 +361,8 @@ class Referee:
                 player.active_creeps.remove(it)
 
         for player in self.game_manager.active_players:
-            player.check_queen_health()
-            self.end_game = True
+            if player.is_queen_dead():
+                self.end_game = True
 
         for it in self.all_entities():
             it.location = it.location.snap_to_integers()
@@ -634,7 +634,6 @@ class Barracks(Structure):
 class Unit(FieldObject):
     unit_type: int
     owner: Player
-    max_health: int
     health: int
 
     def __init__(self, owner, unit_type):
@@ -642,7 +641,6 @@ class Unit(FieldObject):
         self.unit_type = unit_type
         self.owner = owner
         self.location = Vector2()
-        self.max_health = 0
         self.health = 0
 
     @abstractmethod
@@ -656,7 +654,6 @@ class Queen(Unit):
         super().__init__(owner, -1)
         self.mass = Constants.QUEEN_MASS
         self.radius = Constants.QUEEN_RADIUS
-        self.max_health = Constants.QUEEN_HP
 
     def move_towards(self, target: Vector2):
         self.location = self.location.towards(target, Constants.QUEEN_SPEED)
@@ -898,10 +895,11 @@ class Player:
         ent.append(self.queen_unit)
         return ent
 
-    def check_queen_health(self):
+    def is_queen_dead(self):
         self.queen_unit.health = self.health  # << really ?? double bookkeeping here.
-        if self.health == 0:
-            raise Exception("DEAD QUEEN")
+        if self.health <= 0:
+            return True
+        return False
 
     def kill(self, reason):
         self.score = -1

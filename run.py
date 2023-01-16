@@ -70,6 +70,10 @@ def main():
                     break
 
                 ref.game_turn(i)
+
+                if ref.end_game:
+                    print("DEAD Queen")
+                    break
     finally:
         if plot:
             convert_to_gif("test", frames)
