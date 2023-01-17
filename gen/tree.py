@@ -8,10 +8,8 @@ def predict(inp, tree):
     for v in inp:
         if t[0] <= v:
             idx = int(t[1])
-            # t = tree[]
         else:
             idx = int(t[1])
-            # t = tree[int(t[2])]
         if idx >= len(tree):
             break
         t = tree[idx]
@@ -26,6 +24,7 @@ def create_full_binary_tree(config):
         p3 = node * 2 + 2
         tree.append(create_node(config=config, p2=p2, p3=p3))
     return np.array(tree)
+
 
 
 def get_tree_specs(height: int) -> (int, int):
@@ -49,6 +48,7 @@ def create_random_tree(config):
     for _ in range(config["nodes"]):
         tree.append(create_node(config))
     return np.array(tree)
+
 
 
 def dna_to_tree(dna):

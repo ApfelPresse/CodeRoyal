@@ -55,8 +55,8 @@ def crossover_random(p1, p2, config):
 
 
 def init_pop(config):
-    tree_func = config["tree_function"]
-    return [tree_func(config=config) for _ in range(config["n_pop"])]
+    tree_function = config["tree_function"]
+    return [tree_function(config=config) for _ in range(config["n_pop"])]
 
 
 def genetic_algorithm(objective, config, pool):

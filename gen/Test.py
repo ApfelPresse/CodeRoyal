@@ -13,11 +13,12 @@ class Test(unittest.TestCase):
     def test_xor(self):
         def score_xor(args):
             tree, it = args
-            predictions = []
-            predictions.append(predict(inp=[0, 1], tree=tree) == 1)
-            predictions.append(predict(inp=[1, 0], tree=tree) == 1)
-            predictions.append(predict(inp=[1, 1], tree=tree) == 0)
-            predictions.append(predict(inp=[0, 0], tree=tree) == 0)
+            predictions = [
+                predict(inp=[0, 1], tree=tree) == 1,
+                predict(inp=[1, 0], tree=tree) == 1,
+                predict(inp=[1, 1], tree=tree) == 0,
+                predict(inp=[0, 0], tree=tree) == 0
+            ]
             return sum(predictions), tree
 
         nodes = 2
@@ -49,6 +50,7 @@ class Test(unittest.TestCase):
         from sklearn.datasets import load_digits
         digits = load_digits()
         max_score = 20
+
         def score_digits(args):
             tree, it = args
             predictions = []
@@ -81,12 +83,13 @@ class Test(unittest.TestCase):
     def test_max(self):
         def score_xor(args):
             tree, it = args
-            predictions = []
-            predictions.append(predict(inp=list([0, 1, 2]), tree=tree) == 2)
-            predictions.append(predict(inp=list([1, 2, 3]), tree=tree) == 3)
-            predictions.append(predict(inp=list([2, 3, 4]), tree=tree) == 4)
-            predictions.append(predict(inp=list([3, 4, 5]), tree=tree) == 5)
-            predictions.append(predict(inp=list([4, 5, 6]), tree=tree) == 6)
+            predictions = [
+                predict(inp=list([0, 1, 2]), tree=tree) == 2,
+                predict(inp=list([1, 2, 3]), tree=tree) == 3,
+                predict(inp=list([2, 3, 4]), tree=tree) == 4,
+                predict(inp=list([3, 4, 5]), tree=tree) == 5,
+                predict(inp=list([4, 5, 6]), tree=tree) == 6
+            ]
             return sum(predictions), tree
 
         height = 3
