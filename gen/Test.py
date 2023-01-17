@@ -48,31 +48,30 @@ class Test(unittest.TestCase):
     def test_digits(self):
         from sklearn.datasets import load_digits
         digits = load_digits()
-
+        max_score = 20
         def score_digits(args):
             tree, it = args
             predictions = []
-            choices = random.choices(range(digits.data.shape[0]), k=100)
+            choices = random.choices(range(digits.data.shape[0]), k=max_score)
             for i in choices:
-                predictions.append(predict(inp=list(digits.data[i]), tree=tree) == digits.target[i])
+                predictions.append(
+                    predict(inp=list(digits.data[i]), tree=tree) == digits.target[i]
+                )
             return sum(predictions), tree
 
-        nodes = 30
         n_pop = 10
         config = {
-            "nodes": nodes,
             "n_iter": 4000,
+            "height": 8,
             "n_pop": n_pop,
             "r_cross": 0.8,
             "elite_size": int(n_pop * 0.2),
             "r_mut": 0.1,
-            "max_score": 100,
-            "tree_function": tree.create_random_tree,
-            "mutation_function": genetic.mutation_random_tree,
-            "crossover_function": genetic.crossover_random,
+            "max_score": max_score,
+            "tree_function": tree.create_full_binary_tree,
+            "mutation_function": genetic.mutation_full_binary_tree,
+            "crossover_function": genetic.crossover_full_binary_tree,
             "p1_possible_values": list(np.linspace(0, 16, 30)),
-            "p2_possible_values": list(range(nodes)),
-            "p3_possible_values": list(range(nodes)),
             "p4_possible_values": list(range(10)),
         }
         best, score = genetic_algorithm(score_digits, config, None)

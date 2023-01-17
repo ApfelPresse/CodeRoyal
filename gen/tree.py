@@ -7,9 +7,14 @@ def predict(inp, tree):
     t = tree[0]
     for v in inp:
         if t[0] <= v:
-            t = tree[int(t[1])]
+            idx = int(t[1])
+            # t = tree[]
         else:
-            t = tree[int(t[2])]
+            idx = int(t[1])
+            # t = tree[int(t[2])]
+        if idx >= len(tree):
+            break
+        t = tree[idx]
     return t[3]
 
 def create_full_binary_tree(config):
