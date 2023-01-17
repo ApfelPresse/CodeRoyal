@@ -13,7 +13,7 @@ def predict(inp, tree):
     return t[3]
 
 def create_full_binary_tree(config):
-    depth = config["depth"]
+    depth = config["height"]
     tree = []
     nodes, leaves = get_tree_specs(depth)
     for node in range(nodes):

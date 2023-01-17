@@ -2,7 +2,7 @@ import unittest
 
 from gen import tree
 from gen.genetic import genetic_algorithm
-from gen.tree import predict
+from gen.tree import predict, get_tree_specs
 
 
 class Test(unittest.TestCase):
@@ -51,25 +51,21 @@ class Test(unittest.TestCase):
             predictions.append(predict(inp=list([4, 5, 6]), tree=tree) == 6)
             return sum(predictions), tree
 
-        nodes = 10
+        height = 3
+        nodes, leaves = get_tree_specs(height=height)
         n_pop = 100
         config = {
             "n_iter": 4000,
             "n_pop": 100,
-            "depth": 3,
-            "r_cross": 0.8,
+            "height": height,
+            "r_cross": 0.6,
             "elite_size": int(n_pop * 0.1),
             "r_mut": 1 / nodes,
-            "nodes": nodes,
             "max_score": 5,
             "tree_function": tree.create_full_binary_tree,
             "p1_possible_values": [0, 1, 2, 3, 4, 5, 6],
-            "p2_possible_values": list(range(nodes)),
-            "p3_possible_values": list(range(nodes)),
             "p4_possible_values": [2, 3, 4, 5, 6],
         }
-        # with Pool(10) as pool:
-        #     pool = None
         best, score = genetic_algorithm(score_xor, config, None)
         print('Done!')
         print(f"Score {score}")
