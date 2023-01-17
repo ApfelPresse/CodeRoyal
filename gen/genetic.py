@@ -83,8 +83,8 @@ def genetic_algorithm(objective, config, pool):
             p1, p2 = selected[i], selected[i + 1]
             for child in crossover(p1, p2, r_cross):
                 child[:, 0] = mutation(child[:, 0], r_mut, config["p1_possible_values"])
-                child[:, 1] = mutation(child[:, 1], r_mut, config["p2_possible_values"])
-                child[:, 2] = mutation(child[:, 2], r_mut, config["p3_possible_values"])
+                # child[:, 1] = mutation(child[:, 1], r_mut, config["p2_possible_values"])
+                # child[:, 2] = mutation(child[:, 2], r_mut, config["p3_possible_values"])
                 child[:, 3] = mutation(child[:, 3], r_mut, config["p4_possible_values"])
                 children.append(child)
         pop = children

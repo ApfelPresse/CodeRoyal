@@ -4,12 +4,12 @@ import numpy as np
 
 
 def predict(inp, tree):
-    t = tree[0, :]
+    t = tree[0]
     for v in inp:
         if t[0] <= v:
-            t = tree[int(t[1]), :]
+            t = tree[int(t[1])]
         else:
-            t = tree[int(t[2]), :]
+            t = tree[int(t[2])]
     return t[3]
 
 def create_full_binary_tree(config):
@@ -20,7 +20,7 @@ def create_full_binary_tree(config):
         p2 = node * 2 + 1
         p3 = node * 2 + 2
         tree.append(create_node(config=config, p2=p2, p3=p3))
-    return tree
+    return np.array(tree)
 
 
 def get_tree_specs(height: int) -> (int, int):
