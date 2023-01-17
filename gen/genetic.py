@@ -41,12 +41,13 @@ def cross(p1, p2, r_cross):
 def mutation(tree_dna, r_mut, possible_values):
     for i in range(len(tree_dna)):
         if rand() < r_mut:
-            tree_dna[i] = random.choices(possible_values)
+            tree_dna[i] = random.choice(possible_values)
     return tree_dna
 
 
 def init_pop(config):
-    return [tree.create_tree(config=config) for _ in range(config["n_pop"])]
+    tree_func = config["tree_function"]
+    return [tree_func(config=config) for _ in range(config["n_pop"])]
 
 
 def genetic_algorithm(objective, config, pool):

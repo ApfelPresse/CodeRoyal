@@ -1,5 +1,6 @@
 import unittest
 
+from gen import tree
 from gen.genetic import genetic_algorithm
 from gen.tree import predict
 
@@ -26,6 +27,7 @@ class Test(unittest.TestCase):
             "r_mut": 1 / nodes,
             "nodes": nodes,
             "max_score": 4,
+            "tree_function": tree.create_random_tree,
             "p1_possible_values": [0, 1],
             "p2_possible_values": list(range(nodes)),
             "p3_possible_values": list(range(nodes)),
@@ -59,6 +61,7 @@ class Test(unittest.TestCase):
             "r_mut": 1 / nodes,
             "nodes": nodes,
             "max_score": 5,
+            "tree_function": tree.create_random_tree,
             "p1_possible_values": [0, 1, 2, 3, 4, 5, 6],
             "p2_possible_values": list(range(nodes)),
             "p3_possible_values": list(range(nodes)),

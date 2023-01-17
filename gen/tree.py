@@ -12,15 +12,37 @@ def predict(inp, tree):
             t = tree[int(t[2]), :]
     return t[3]
 
+def create_full_binary_tree(config):
+    depth = config["depth"]
+    tree = []
+    nodes, leaves = get_tree_specs(depth)
+    for node in range(nodes):
+        p2 = node * 2 + 1
+        p3 = node * 2 + 2
+        tree.append(create_node(config=config, p2=p2, p3=p3))
+    return tree
 
-def create_tree(config):
+
+def get_tree_specs(height: int) -> (int, int):
+    nodes = 2 ** (height + 1) - 1
+    leaves = (nodes + 1) // 2
+    return nodes, leaves
+
+
+def create_node(config, p2=None, p3=None):
+    value = random.choice(config["p1_possible_values"])
+    if p2 is None:
+        p2 = random.choice(config["p2_possible_values"])
+    if p3 is None:
+        p3 = random.choice(config["p3_possible_values"])
+    label = random.choice(config["p4_possible_values"])
+    return [value, p2, p3, label]
+
+
+def create_random_tree(config):
     tree = []
     for _ in range(config["nodes"]):
-        value = random.choices(config["p1_possible_values"])
-        p2 = random.choices(config["p2_possible_values"])
-        p3 = random.choices(config["p3_possible_values"])
-        p4 = random.choices(config["p4_possible_values"])
-        tree.append([value, p2, p3, p4])
+        tree.append(create_node(config))
     return np.array(tree)
 
 
