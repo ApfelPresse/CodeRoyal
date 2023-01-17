@@ -1,6 +1,9 @@
+import random
 import unittest
 
-from gen import tree
+import numpy as np
+
+from gen import tree, genetic
 from gen.genetic import genetic_algorithm
 from gen.tree import predict, get_tree_specs
 
@@ -28,6 +31,8 @@ class Test(unittest.TestCase):
             "nodes": nodes,
             "max_score": 4,
             "tree_function": tree.create_random_tree,
+            "mutation_function": genetic.mutation_random_tree,
+            "crossover_function": genetic.crossover_random,
             "p1_possible_values": [0, 1],
             "p2_possible_values": list(range(nodes)),
             "p3_possible_values": list(range(nodes)),
@@ -39,6 +44,40 @@ class Test(unittest.TestCase):
         print('Done!')
         print(best)
         print(f"Score {score}")
+
+    def test_digits(self):
+        from sklearn.datasets import load_digits
+        digits = load_digits()
+
+        def score_digits(args):
+            tree, it = args
+            predictions = []
+            choices = random.choices(range(digits.data.shape[0]), k=100)
+            for i in choices:
+                predictions.append(predict(inp=list(digits.data[i]), tree=tree) == digits.target[i])
+            return sum(predictions), tree
+
+        nodes = 30
+        n_pop = 10
+        config = {
+            "nodes": nodes,
+            "n_iter": 4000,
+            "n_pop": n_pop,
+            "r_cross": 0.8,
+            "elite_size": int(n_pop * 0.2),
+            "r_mut": 0.1,
+            "max_score": 100,
+            "tree_function": tree.create_random_tree,
+            "mutation_function": genetic.mutation_random_tree,
+            "crossover_function": genetic.crossover_random,
+            "p1_possible_values": list(np.linspace(0, 16, 30)),
+            "p2_possible_values": list(range(nodes)),
+            "p3_possible_values": list(range(nodes)),
+            "p4_possible_values": list(range(10)),
+        }
+        best, score = genetic_algorithm(score_digits, config, None)
+        print('Done!')
+        print(f"Score {score}/{config['max_score']}")
 
     def test_max(self):
         def score_xor(args):
@@ -63,6 +102,8 @@ class Test(unittest.TestCase):
             "r_mut": 1 / nodes,
             "max_score": 5,
             "tree_function": tree.create_full_binary_tree,
+            "mutation_function": genetic.mutation_full_binary_tree,
+            "crossover_function": genetic.crossover_full_binary_tree,
             "p1_possible_values": [0, 1, 2, 3, 4, 5, 6],
             "p4_possible_values": [2, 3, 4, 5, 6],
         }
