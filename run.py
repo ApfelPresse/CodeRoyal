@@ -34,32 +34,11 @@ def main():
     try:
         from auto_profiler import Profiler
         with Profiler(depth=5):
-            # for i in range(ref.game_manager.max_turns):
-            for i in range(25):
+            for i in range(ref.game_manager.max_turns):
                 print(f"Round {i}")
 
                 for j, player in enumerate(ref.game_manager.active_players):
-                    obs_for_player = []
-                    touching_side: Optional[Obstacle] = None
-                    for obs in ref.obstacles:
-                        if player.queen_unit.is_in_range_of(obs):
-                            touching_side = obs
-                        obs_for_player.append(player.print_obstacle_per_turn(obs))
-
-                    units = list(map(lambda item: {
-                        "x": item.location.x,
-                        "y": item.location.y,
-                        "owner": player.fix_owner(item.owner),
-                        "type": item.unit_type,
-                        "health": item.health,
-                    }, ref.all_units()))
-                    info = {
-                        "gold": player.gold,
-                        "queen_touching": touching_side.obstacle_id if touching_side is not None else -1,
-                        "obstacles": obs_for_player,
-                        "units": units
-                    }
-
+                    info = create_player_info(player, ref)
                     _last, player.outputs = players[player.name](last[player.name], info)
                     last[player.name] = _last
 
@@ -77,6 +56,29 @@ def main():
     finally:
         if plot:
             convert_to_gif("test", frames)
+
+
+def create_player_info(player, ref):
+    obs_for_player = []
+    touching_side: Optional[Obstacle] = None
+    for obs in ref.obstacles:
+        if player.queen_unit.is_in_range_of(obs):
+            touching_side = obs
+        obs_for_player.append(player.print_obstacle_per_turn(obs))
+    units = list(map(lambda item: {
+        "x": item.location.x,
+        "y": item.location.y,
+        "owner": player.fix_owner(item.owner),
+        "type": item.unit_type,
+        "health": item.health,
+    }, ref.all_units()))
+    info = {
+        "gold": player.gold,
+        "queen_touching": touching_side.obstacle_id if touching_side is not None else -1,
+        "obstacles": obs_for_player,
+        "units": units
+    }
+    return info
 
 
 if __name__ == '__main__':
