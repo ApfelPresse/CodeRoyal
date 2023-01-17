@@ -23,7 +23,7 @@ def create_full_binary_tree(config):
         p2 = node * 2 + 1
         p3 = node * 2 + 2
         tree.append(create_node(config=config, p2=p2, p3=p3))
-    return np.array(tree)
+    return tree
 
 
 
@@ -47,7 +47,7 @@ def create_random_tree(config):
     tree = []
     for _ in range(config["nodes"]):
         tree.append(create_node(config))
-    return np.array(tree)
+    return tree
 
 
 
