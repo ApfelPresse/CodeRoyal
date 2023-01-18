@@ -518,7 +518,6 @@ def build_map(obstacles_count: int) -> List[Obstacle]:
             o.gold += Constants.OBSTACLE_GOLD_INCREASE
     return obstacles
 
-
 def fix_collisions(entities: List[FieldObject], max_iterations: int = 999):
     for _ in range(max_iterations):
         if not collision_check(entities):
@@ -1078,3 +1077,25 @@ ARCHER = CreepType(count=2, cost=100, speed=75, range_=200, radius=25, mass=900,
                    asset_name="Unite_Archer", ordinal=1)
 GIANT = CreepType(count=1, cost=140, speed=50, range_=0, radius=40, mass=2000, hp=200, build_time=10,
                   asset_name="Unite_Siege", ordinal=2)
+
+def create_player_info(player, ref):
+    obs_for_player = []
+    touching_side: Optional[Obstacle] = None
+    for obs in ref.obstacles:
+        if player.queen_unit.is_in_range_of(obs):
+            touching_side = obs
+        obs_for_player.append(player.print_obstacle_per_turn(obs))
+    units = list(map(lambda item: {
+        "x": item.location.x,
+        "y": item.location.y,
+        "owner": player.fix_owner(item.owner),
+        "type": item.unit_type,
+        "health": item.health,
+    }, ref.all_units()))
+    info = {
+        "gold": player.gold,
+        "queen_touching": touching_side.obstacle_id if touching_side is not None else -1,
+        "obstacles": obs_for_player,
+        "units": units
+    }
+    return info

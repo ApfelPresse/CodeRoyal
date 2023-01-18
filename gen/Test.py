@@ -2,13 +2,13 @@ import random
 import unittest
 
 import numpy as np
-from optimized.ref import Referee
+from optimized.ref import Referee, create_player_info
 
 from boss import handle_boss_3, handle_boss_1
 from gen import tree, genetic
 from gen.genetic import genetic_algorithm
 from gen.tree import predict, get_tree_specs
-from run import create_player_info
+# from original.ref import create_player_info
 
 
 class Test(unittest.TestCase):
@@ -132,9 +132,8 @@ class Test(unittest.TestCase):
             score = 0
             for i in range(ref.game_manager.max_turns):
                 for j, player in enumerate(ref.game_manager.active_players):
-                    info = create_player_info(player, ref)
-                    _last, player.outputs = players[player.name](last[player.name], info)
-                    last[player.name] = _last
+                    last[player.name], player.outputs = players[player.name](last[player.name], create_player_info(player, ref))
+
 
                 ref.game_turn(i)
                 if ref.end_game:

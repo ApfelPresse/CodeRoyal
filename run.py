@@ -1,11 +1,10 @@
 import random
-from typing import Optional
 
 import numpy as np
 
 from boss import handle_boss_3
 from sprites.sprites import plot_current_frame, convert_to_gif
-from original.ref import Referee, Obstacle
+from original.ref import Referee, create_player_info
 from util import timeit
 
 
@@ -38,9 +37,7 @@ def main():
                 print(f"Round {i}")
 
                 for j, player in enumerate(ref.game_manager.active_players):
-                    info = create_player_info(player, ref)
-                    _last, player.outputs = players[player.name](last[player.name], info)
-                    last[player.name] = _last
+                    last[player.name], player.outputs = players[player.name](last[player.name], create_player_info(player, ref))
 
                 if plot and i % 2 == 0:
                     frames.append(plot_current_frame(ref, i))
@@ -56,29 +53,6 @@ def main():
     finally:
         if plot:
             convert_to_gif("test", frames)
-
-
-def create_player_info(player, ref):
-    obs_for_player = []
-    touching_side: Optional[Obstacle] = None
-    for obs in ref.obstacles:
-        if player.queen_unit.is_in_range_of(obs):
-            touching_side = obs
-        obs_for_player.append(player.print_obstacle_per_turn(obs))
-    units = list(map(lambda item: {
-        "x": item.location.x,
-        "y": item.location.y,
-        "owner": player.fix_owner(item.owner),
-        "type": item.unit_type,
-        "health": item.health,
-    }, ref.all_units()))
-    info = {
-        "gold": player.gold,
-        "queen_touching": touching_side.obstacle_id if touching_side is not None else -1,
-        "obstacles": obs_for_player,
-        "units": units
-    }
-    return info
 
 
 if __name__ == '__main__':
