@@ -390,7 +390,7 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
         u1.location = u1.location.clamp_within(clamp_dist, Constants.WORLD_WIDTH - clamp_dist, clamp_dist,
                                                Constants.WORLD_HEIGHT - clamp_dist)
 
-        u1.location.check_if_not_smaller_zero()
+        #u1.location.check_if_not_smaller_zero()
         for iu2, u2 in enumerate(entities):
             if iu1 == iu2:
                 continue
@@ -408,11 +408,11 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
                     d1, d2 = u2.mass / (u1.mass + u2.mass), u1.mass / (u1.mass + u2.mass)
                 u1tou2 = u2.location - u1.location
                 gap = 20.0 if u1.mass == 0 and u2.mass == 0 else 1.0
-                u1.location -= u1tou2.resized_to(d1 * overlap + 0.0 if (u1.mass == 0 and u2.mass > 0) else gap)
-                u2.location += u1tou2.resized_to(d2 * overlap + 0.0 if (u2.mass == 0 and u1.mass > 0) else gap)
+                u1.location -= u1tou2.resized_to(d1 * overlap + (0.0 if u1.mass == 0 and u2.mass > 0 else gap))
+                u2.location += u1tou2.resized_to(d2 * overlap + (0.0 if u2.mass == 0 and u1.mass > 0 else gap))
 
-                u1.location.check_if_not_smaller_zero()
-                u2.location.check_if_not_smaller_zero()
+                #u1.location.check_if_not_smaller_zero()
+                #u2.location.check_if_not_smaller_zero()
                 return True
     return False
 
