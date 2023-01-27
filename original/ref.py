@@ -394,10 +394,11 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
         for iu2, u2 in enumerate(entities):
             if iu1 == iu2:
                 continue
-            overlap = u1.radius + u2.radius + acceptable_gap - u1.location.distance_to(u2.location)
-            if overlap <= 1e-6:
+            overlap = u1.location.distance_to(u2.location) - (u1.radius + u2.radius + acceptable_gap)
+            if overlap > 0:
                 continue
             else:
+                overlap = u1.radius + u2.radius + acceptable_gap - u1.location.distance_to(u2.location)
                 if u1.mass == 0 and u2.mass == 0:
                     d1, d2 = 0.5, 0.5
                 elif u1.mass == 0:
@@ -494,7 +495,7 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
             o1.location = mid
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
-        collision_check(obs, float(Constants.OBSTACLE_GAP))
+        collision_check(obs, Constants.OBSTACLE_GAP)
     return obs
 
 
