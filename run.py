@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 from boss import handle_boss_3
-from sprites.sprites import plot_current_frame, convert_to_gif
+from sprites.sprites import plot_current_frame, convert_to_gif, create_plot_config
 from original.ref import Referee, create_player_info
 from util import timeit
 
@@ -20,7 +20,7 @@ def main():
     ref = Referee(params)
 
     plot = True
-    frames = []
+    config = create_plot_config(ref)
 
     players = {
         "red": handle_boss_3,
@@ -40,19 +40,22 @@ def main():
                 last[player.name], player.outputs = players[player.name](last[player.name], create_player_info(player, ref))
 
             if plot and i % 1 == 0:
-                frames.append(plot_current_frame(ref, i))
+                plot_current_frame(config, i)
 
             if i >= 1 and ref.game_end():
                 break
 
             ref.game_turn(i)
 
+            if i == 2:
+                break
+
             if ref.end_game:
                 print("DEAD Queen")
                 break
     finally:
         if plot:
-            convert_to_gif("test", frames)
+            convert_to_gif("test", config)
 
 
 if __name__ == '__main__':

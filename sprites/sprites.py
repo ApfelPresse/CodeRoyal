@@ -17,7 +17,30 @@ def read_image(image_file_name):
         return plt.imread(f"../{image_file_name}")
 
 
-def plot_current_frame(ref, frame=0):
+class convert_to_dot_notation(dict):
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+
+def create_plot_config(ref):
+    config = {
+        "frames": [],
+        "old_state": {},
+        "ref": ref
+    }
+    return convert_to_dot_notation(config)
+
+
+def plot_current_frame(config, frame=0):
+    ref = config.ref
+
+    if not "obstacles" in config.old_state:
+        config.old_state["obstacles"] = {}
+
+    if not "destroyed" in config.old_state:
+        config.old_state["destroyed"] = {}
+
     scale = 4
     fig, ax = plt.subplots(figsize=(4 * scale, 3 * scale))
     fig.patch.set_facecolor('black')
@@ -49,8 +72,14 @@ def plot_current_frame(ref, frame=0):
         axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=5)
         axin.imshow(game_json["Unite_Reine"]["image"])
         axin.axis('off')
-        ax.add_patch(
-            plt.Circle((x, y), player.queen_unit.radius, color=player.name, alpha=0.6, zorder=4))
+
+        unite_base_width = width - 20
+        axin = ax.inset_axes([x - unite_base_width / 2, y - unite_base_width / 2, unite_base_width, unite_base_width], transform=ax.transData, zorder=4)
+        if player.name == "red":
+            axin.imshow(game_json["Unite_Base_Rouge"]["image"])
+        else:
+            axin.imshow(game_json["Unite_Base_Bleu"]["image"])
+        axin.axis('off')
 
         for creep in player.active_creeps:
             x = creep.location.x
@@ -82,30 +111,32 @@ def plot_current_frame(ref, frame=0):
         axin = ax.inset_axes([x - radius, y - radius, radius * 2, radius * 2], transform=ax.transData, zorder=2)
         axin.axis('off')
 
-        if isinstance(obstacle.structure, Tower):
+        if obstacle.obstacle_id in config.old_state["obstacles"] and config.old_state["obstacles"][obstacle.obstacle_id]:
+            if obstacle.structure is None:
+                config.old_state["destroyed"][obstacle.obstacle_id] = True
+
+        if obstacle.obstacle_id in config.old_state["destroyed"]:
+            axin.imshow(game_json[f"LieuDetruit"]["image"])
+        elif isinstance(obstacle.structure, Tower):
             tower_idx = (frame % 15) + 1
             tower = game_json[f"T{obstacle.structure.owner.name[0].upper()}{tower_idx:02d}"]["image"]
             axin.imshow(tower)
             ax.add_patch(
                 plt.Circle((x, y), obstacle.structure.attack_radius, color=obstacle.structure.owner.name, alpha=0.1,
                            zorder=100))
-
-        if isinstance(obstacle.structure, Mine):
+        elif isinstance(obstacle.structure, Mine):
             text(x, y, f"{obstacle.obstacle_id} +{obstacle.structure.income_rate}/{obstacle.max_mine_size}",
-                 fontsize=4*scale, color="orange")
+                 fontsize=4 * scale, color="orange")
             axin.imshow(game_json["Mine"]["image"])
-
-        if isinstance(obstacle.structure, Barracks):
+        elif isinstance(obstacle.structure, Barracks):
             if obstacle.structure.owner.name == "red":
                 axin.imshow(game_json["Caserne_Rouge"]["image"])
             else:
                 axin.imshow(game_json["Caserne_Bleu"]["image"])
-
-        if obstacle.structure is None:
+        else:
             axin.imshow(game_json[f"LC_{obstacle.obstacle_tile_id}"]["image"])
 
-        ax.add_patch(
-            plt.Circle((x, y), obstacle.radius, color="b", alpha=0.9, zorder=1))
+        config.old_state["obstacles"][obstacle.obstacle_id] = obstacle.structure is not None
 
     player_stats = []
     for i, player in enumerate(ref.game_manager.players):
@@ -124,7 +155,7 @@ def plot_current_frame(ref, frame=0):
     image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
 
     plt.close()
-    return image
+    config.frames.append(image)
 
 
 def create_logo(ax, height, width):
@@ -182,8 +213,13 @@ def create_hud(ax, game_json, width, ref, scale):
     queen_hp = ref.queen_hp
     for player in ref.game_manager.players:
         perc = ((100 / queen_hp) * player.queen_unit.health) / 100
+
         if player.name == "blue":
-            text((width // 2) - 250, 30, f"{player.gold}    +{income_blue}", fontsize=5 * scale, color="white", zorder=12)
+            label = f"{player.gold}+{income_blue}"
+            label_length = "".join([" "] * (9 - len(label)))
+            label = f"{player.gold}{label_length}+{income_blue}"
+
+            text((width // 2) - 250, 30, label, fontsize=5 * scale, color="white", zorder=12)
             text(145, 15, player.queen_unit.health, fontsize=4 * scale, color="white", zorder=13)
             life_image = game_json["Life-Bleu"]["image"]
             axin = ax.inset_axes([145, life_image.size[1] // 2, life_image.size[0] * perc, life_image.size[1] * 0.92],
@@ -200,7 +236,8 @@ def create_hud(ax, game_json, width, ref, scale):
         axin.axis('off')
 
 
-def convert_to_gif(name: str, frames: list):
+def convert_to_gif(name: str, config):
+    frames = config.frames
     file_name = f'./gifs/{name}.gif'
     imageio.mimsave(file_name, frames, fps=3)
     print(file_name)
