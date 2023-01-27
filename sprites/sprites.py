@@ -169,18 +169,28 @@ def create_hud(ax, game_json, width, ref, scale):
     axin.imshow(game_json["Unite_Base_Rouge"]["image"])
     axin.axis('off')
 
+    income_blue = 0
+    income_red = 0
+    for obs in ref.obstacles:
+        if isinstance(obs.structure, Mine):
+            mine = obs.structure
+            if mine.owner.name == "blue":
+                income_blue += mine.income_rate
+            else:
+                income_red += mine.income_rate
+
     queen_hp = ref.queen_hp
     for player in ref.game_manager.players:
         perc = ((100 / queen_hp) * player.queen_unit.health) / 100
         if player.name == "blue":
-            text((width // 2) - 250, 30, player.gold, fontsize=5 * scale, color="white", zorder=12)
+            text((width // 2) - 250, 30, f"{player.gold}    +{income_blue}", fontsize=5 * scale, color="white", zorder=12)
             text(145, 15, player.queen_unit.health, fontsize=4 * scale, color="white", zorder=13)
             life_image = game_json["Life-Bleu"]["image"]
             axin = ax.inset_axes([145, life_image.size[1] // 2, life_image.size[0] * perc, life_image.size[1] * 0.92],
                                  transform=ax.transData, zorder=12)
         else:
-            text((width // 2) + 180, 30, player.gold, fontsize=5 * scale, color="white", zorder=12)
-            text(width - 560, 15, player.queen_unit.health, fontsize=4 * scale, color="white", zorder=13)
+            text((width // 2) + 60, 30, f"{income_red}+    {player.gold}", fontsize=5 * scale, color="white", zorder=12)
+            text(width - 220, 15, player.queen_unit.health, fontsize=4 * scale, color="white", zorder=13)
             life_image = game_json["Life-Rouge"]["image"]
             axin = ax.inset_axes(
                 [width - 560, life_image.size[1] // 2, life_image.size[0] * perc, life_image.size[1] * 0.92],

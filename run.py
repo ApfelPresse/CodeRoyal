@@ -45,9 +45,6 @@ def main():
             if i >= 1 and ref.game_end():
                 break
 
-            if i == 20:
-                break
-
             ref.game_turn(i)
 
             if ref.end_game:
