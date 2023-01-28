@@ -61,20 +61,23 @@ def plot_current_frame(config, frame=0):
     axin.axis('off')
 
     game_json = create_game_json()
+    destruction_json = create_destruction_json()
     create_hud(ax, game_json, width, ref, scale)
     create_logo(ax, height, width)
 
     for i, player in enumerate(ref.game_manager.players):
-        width = 80
+        unit_width = 80
         x = player.queen_unit.location.x
         y = player.queen_unit.location.y
 
-        axin = ax.inset_axes([x - width / 2, y - width / 2, width, width], transform=ax.transData, zorder=5)
+        axin = ax.inset_axes([x - unit_width / 2, y - unit_width / 2, unit_width, unit_width], transform=ax.transData,
+                             zorder=5)
         axin.imshow(game_json["Unite_Reine"]["image"])
         axin.axis('off')
 
-        unite_base_width = width - 20
-        axin = ax.inset_axes([x - unite_base_width / 2, y - unite_base_width / 2, unite_base_width, unite_base_width], transform=ax.transData, zorder=4)
+        unite_base_width = unit_width - 20
+        axin = ax.inset_axes([x - unite_base_width / 2, y - unite_base_width / 2, unite_base_width, unite_base_width],
+                             transform=ax.transData, zorder=4)
         if player.name == "red":
             axin.imshow(game_json["Unite_Base_Rouge"]["image"])
         else:
@@ -111,7 +114,8 @@ def plot_current_frame(config, frame=0):
         axin = ax.inset_axes([x - radius, y - radius, radius * 2, radius * 2], transform=ax.transData, zorder=2)
         axin.axis('off')
 
-        if obstacle.obstacle_id in config.old_state["obstacles"] and config.old_state["obstacles"][obstacle.obstacle_id]:
+        if obstacle.obstacle_id in config.old_state["obstacles"] and config.old_state["obstacles"][
+            obstacle.obstacle_id]:
             if obstacle.structure is None:
                 config.old_state["destroyed"][obstacle.obstacle_id] = True
 
@@ -138,17 +142,7 @@ def plot_current_frame(config, frame=0):
 
         config.old_state["obstacles"][obstacle.obstacle_id] = obstacle.structure is not None
 
-    player_stats = []
-    for i, player in enumerate(ref.game_manager.players):
-        player_stats.append([])
-        player_stats[i].append(f"Player {i}")
-        player_stats[i].append(player.gold)
-        player_stats[i].append(player.queen_unit.health)
-
-    player_stats_zip = list(map(lambda items: "-".join(map(str, items)), zip(*player_stats)))
-
-    msg = "\n".join([f"Gameturn {ref.turn}"] + player_stats_zip)
-    ax.text(width / 2, height, msg, fontsize=10, bbox={'facecolor': 'white', 'alpha': 0, 'pad': 5})
+    create_log(ax, ref, scale, width)
 
     fig.canvas.draw()
     image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
@@ -156,6 +150,29 @@ def plot_current_frame(config, frame=0):
 
     plt.close()
     config.frames.append(image)
+
+
+def create_log(ax, ref, scale, width):
+    player_stats_red = []
+    player_stats_blue = []
+    for player in ref.game_manager.players:
+        if player.name == "red":
+            player_stats = player_stats_red
+        else:
+            player_stats = player_stats_blue
+
+        player_stats.append(f"Gold {player.gold}")
+        player_stats.append(f"Health {player.queen_unit.health}")
+        player_stats.extend(player.outputs)
+
+    w = 45
+    msg = "\n".join([f"Gameturn {ref.turn} blue"] + player_stats_blue)
+    ax.text(0, -(len(player_stats_blue) * w), msg, fontsize=4 * scale, color="white",
+            bbox={'facecolor': 'white', 'alpha': 0, 'pad': 5})
+
+    msg = "\n".join([f"Gameturn {ref.turn} red"] + player_stats_red)
+    ax.text(width / 2, -(len(player_stats_red) * w), msg, fontsize=4 * scale, color="white",
+            bbox={'facecolor': 'white', 'alpha': 0, 'pad': 5})
 
 
 def create_logo(ax, height, width):
@@ -170,6 +187,18 @@ def create_game_json():
     with open(pathlib.Path(__file__).parent.joinpath("game.json")) as file:
         game_json = json.loads(file.read())["frames"]
     game_image = Image.open(pathlib.Path(__file__).parent.joinpath("game.png"))
+    for key in game_json.keys():
+        item = game_json[key]["frame"]
+        im = game_image.crop((item["x"], item["y"], item["x"] + item["w"], item["y"] + item["h"]))
+        game_json[key]["image"] = im
+        # im.save(f'spriteso/tmp/{key}.png')
+    return game_json
+
+
+def create_destruction_json():
+    with open(pathlib.Path(__file__).parent.joinpath("destruction.json")) as file:
+        game_json = json.loads(file.read())["frames"]
+    game_image = Image.open(pathlib.Path(__file__).parent.joinpath("destruction.png"))
     for key in game_json.keys():
         item = game_json[key]["frame"]
         im = game_image.crop((item["x"], item["y"], item["x"] + item["w"], item["y"] + item["h"]))
