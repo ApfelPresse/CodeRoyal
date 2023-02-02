@@ -390,7 +390,7 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
         u1.location = u1.location.clamp_within(clamp_dist, Constants.WORLD_WIDTH - clamp_dist, clamp_dist,
                                                Constants.WORLD_HEIGHT - clamp_dist)
 
-        #u1.location.check_if_not_smaller_zero()
+        # u1.location.check_if_not_smaller_zero()
         for iu2, u2 in enumerate(entities):
             if iu1 == iu2:
                 continue
@@ -412,8 +412,8 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
                 u1.location -= u1tou2.resized_to(d1 * overlap + (0.0 if u1.mass == 0 and u2.mass > 0 else gap))
                 u2.location += u1tou2.resized_to(d2 * overlap + (0.0 if u2.mass == 0 and u1.mass > 0 else gap))
 
-                #u1.location.check_if_not_smaller_zero()
-                #u2.location.check_if_not_smaller_zero()
+                # u1.location.check_if_not_smaller_zero()
+                # u2.location.check_if_not_smaller_zero()
                 return True
     return False
 
@@ -585,13 +585,7 @@ class Tower(Structure):
         target.damage(damage)
 
     def act(self):
-        closest_enemy = None
-        closest_enemy_dist = None
-        for creep in self.owner.enemy_player.active_creeps:
-            dist = self.obstacle.location.distance_to(creep.location)
-            if closest_enemy_dist is None or dist < closest_enemy_dist:
-                closest_enemy_dist = dist
-                closest_enemy = creep
+        closest_enemy = self.find_closest_enemy()
 
         enemy_queen = self.owner.enemy_player.queen_unit
         if closest_enemy is not None and closest_enemy.location.distance_to(
@@ -605,6 +599,16 @@ class Tower(Structure):
         if self.health <= 0:
             return True
         return False
+
+    def find_closest_enemy(self):
+        closest_enemy = None
+        closest_enemy_dist = None
+        for creep in self.owner.enemy_player.active_creeps:
+            dist = self.obstacle.location.distance_to(creep.location)
+            if closest_enemy_dist is None or dist < closest_enemy_dist:
+                closest_enemy_dist = dist
+                closest_enemy = creep
+        return closest_enemy
 
 
 class Barracks(Structure):

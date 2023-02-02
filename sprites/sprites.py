@@ -122,12 +122,16 @@ def plot_current_frame(config, frame=0):
         if obstacle.obstacle_id in config.old_state["destroyed"]:
             axin.imshow(game_json[f"LieuDetruit"]["image"])
         elif isinstance(obstacle.structure, Tower):
+            tower_struc = obstacle.structure
             tower_idx = (frame % 15) + 1
             tower = game_json[f"T{obstacle.structure.owner.name[0].upper()}{tower_idx:02d}"]["image"]
             axin.imshow(tower)
             ax.add_patch(
                 plt.Circle((x, y), obstacle.structure.attack_radius, color=obstacle.structure.owner.name, alpha=0.1,
                            zorder=100))
+
+            show_strikes_from_tower_on_enemy(ax, game_json, obstacle, tower_struc)
+
         elif isinstance(obstacle.structure, Mine):
             text(x, y, f"{obstacle.obstacle_id} +{obstacle.structure.income_rate}/{obstacle.max_mine_size}",
                  fontsize=4 * scale, color="orange")
@@ -150,6 +154,28 @@ def plot_current_frame(config, frame=0):
 
     plt.close()
     config.frames.append(image)
+
+
+def show_strikes_from_tower_on_enemy(ax, game_json, obstacle, tower_struc):
+    closest_enemy = tower_struc.find_closest_enemy()
+    enemy_queen = tower_struc.owner.enemy_player.queen_unit
+    if obstacle.structure.owner.name == "blue":
+        strike = game_json["Eclair_Bleu"]["image"]
+    else:
+        strike = game_json["Eclair_Rouge"]["image"]
+
+    if closest_enemy is not None and closest_enemy.location.distance_to(obstacle.location) < tower_struc.attack_radius:
+        axin_strike = ax.inset_axes(
+            [closest_enemy.location.x - closest_enemy.radius, closest_enemy.location.y - closest_enemy.radius,
+             2 * closest_enemy.radius, 2 * closest_enemy.radius], transform=ax.transData, zorder=6)
+        axin_strike.imshow(strike, aspect="auto")
+        axin_strike.axis('off')
+    elif enemy_queen.location.distance_to(tower_struc.obstacle.location) < tower_struc.attack_radius:
+        axin_strike = ax.inset_axes(
+            [enemy_queen.location.x - enemy_queen.radius, enemy_queen.location.y - enemy_queen.radius,
+             2 * enemy_queen.radius, 2 * enemy_queen.radius], transform=ax.transData, zorder=6)
+        axin_strike.imshow(strike, aspect="auto")
+        axin_strike.axis('off')
 
 
 def create_log(ax, ref, scale, width):

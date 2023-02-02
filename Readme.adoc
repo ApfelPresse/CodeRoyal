@@ -1,0 +1,11 @@
+= CodeRoyal in Python
+
+image::sprites/logo.png[]
+
+Port CodeRoyal Kotlin (https://github.com/csj/code-royale) to Python
+
+== Quickstart
+
+    python3 run.py
+
+image::example.gif[]

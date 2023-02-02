@@ -14,6 +14,7 @@ def main():
     random.seed(seed_value)
     np.random.seed(seed_value)
 
+    # tag::example[]
     params = {
         "leagueLevel": 3
     }
@@ -31,8 +32,6 @@ def main():
         "blue": {}
     }
     try:
-        # from auto_profiler import Profiler
-        # with Profiler(depth=5):
         for i in range(ref.game_manager.max_turns):
             print(f"Round {i}")
 
@@ -47,16 +46,13 @@ def main():
 
             ref.game_turn(i)
 
-            if i == 2:
-                break
-
             if ref.end_game:
                 print("DEAD Queen")
                 break
     finally:
         if plot:
             convert_to_gif("test", config)
-
+    # end::example[]
 
 if __name__ == '__main__':
     main()

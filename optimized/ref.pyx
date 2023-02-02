@@ -390,14 +390,15 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
         u1.location = u1.location.clamp_within(clamp_dist, Constants.WORLD_WIDTH - clamp_dist, clamp_dist,
                                                Constants.WORLD_HEIGHT - clamp_dist)
 
-        u1.location.check_if_not_smaller_zero()
+        # u1.location.check_if_not_smaller_zero()
         for iu2, u2 in enumerate(entities):
             if iu1 == iu2:
                 continue
-            overlap = u1.radius + u2.radius + acceptable_gap - u1.location.distance_to(u2.location)
-            if overlap <= 1e-6:
+            overlap = u1.location.distance_to(u2.location) - (u1.radius + u2.radius + acceptable_gap)
+            if overlap > 0:
                 continue
             else:
+                overlap = u1.radius + u2.radius + acceptable_gap - u1.location.distance_to(u2.location)
                 if u1.mass == 0 and u2.mass == 0:
                     d1, d2 = 0.5, 0.5
                 elif u1.mass == 0:
@@ -408,11 +409,11 @@ def collision_check(entities: List[FieldObject], acceptable_gap: float = 0.0) ->
                     d1, d2 = u2.mass / (u1.mass + u2.mass), u1.mass / (u1.mass + u2.mass)
                 u1tou2 = u2.location - u1.location
                 gap = 20.0 if u1.mass == 0 and u2.mass == 0 else 1.0
-                u1.location -= u1tou2.resized_to(d1 * overlap + 0.0 if (u1.mass == 0 and u2.mass > 0) else gap)
-                u2.location += u1tou2.resized_to(d2 * overlap + 0.0 if (u2.mass == 0 and u1.mass > 0) else gap)
+                u1.location -= u1tou2.resized_to(d1 * overlap + (0.0 if u1.mass == 0 and u2.mass > 0 else gap))
+                u2.location += u1tou2.resized_to(d2 * overlap + (0.0 if u2.mass == 0 and u1.mass > 0 else gap))
 
-                u1.location.check_if_not_smaller_zero()
-                u2.location.check_if_not_smaller_zero()
+                # u1.location.check_if_not_smaller_zero()
+                # u2.location.check_if_not_smaller_zero()
                 return True
     return False
 
@@ -494,7 +495,7 @@ def build_obstacles(obstacles: int) -> List[Obstacle]:
             o1.location = mid
             o2.location = Vector2(Constants.WORLD_WIDTH - mid.x, Constants.WORLD_HEIGHT - mid.y)
 
-        collision_check(obs, float(Constants.OBSTACLE_GAP))
+        collision_check(obs, Constants.OBSTACLE_GAP)
     return obs
 
 
@@ -517,6 +518,7 @@ def build_map(obstacles_count: int) -> List[Obstacle]:
             o.max_mine_size += 1
             o.gold += Constants.OBSTACLE_GOLD_INCREASE
     return obstacles
+
 
 def fix_collisions(entities: List[FieldObject], max_iterations: int = 999):
     for _ in range(max_iterations):
@@ -583,13 +585,7 @@ class Tower(Structure):
         target.damage(damage)
 
     def act(self):
-        closest_enemy = None
-        closest_enemy_dist = None
-        for creep in self.owner.enemy_player.active_creeps:
-            dist = self.obstacle.location.distance_to(creep.location)
-            if closest_enemy_dist is None or dist < closest_enemy_dist:
-                closest_enemy_dist = dist
-                closest_enemy = creep
+        closest_enemy = self.find_closest_enemy()
 
         enemy_queen = self.owner.enemy_player.queen_unit
         if closest_enemy is not None and closest_enemy.location.distance_to(
@@ -603,6 +599,16 @@ class Tower(Structure):
         if self.health <= 0:
             return True
         return False
+
+    def find_closest_enemy(self):
+        closest_enemy = None
+        closest_enemy_dist = None
+        for creep in self.owner.enemy_player.active_creeps:
+            dist = self.obstacle.location.distance_to(creep.location)
+            if closest_enemy_dist is None or dist < closest_enemy_dist:
+                closest_enemy_dist = dist
+                closest_enemy = creep
+        return closest_enemy
 
 
 class Barracks(Structure):
@@ -1077,6 +1083,7 @@ ARCHER = CreepType(count=2, cost=100, speed=75, range_=200, radius=25, mass=900,
                    asset_name="Unite_Archer", ordinal=1)
 GIANT = CreepType(count=1, cost=140, speed=50, range_=0, radius=40, mass=2000, hp=200, build_time=10,
                   asset_name="Unite_Siege", ordinal=2)
+
 
 def create_player_info(player, ref):
     obs_for_player = []
